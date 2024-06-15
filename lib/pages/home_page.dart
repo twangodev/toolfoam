@@ -49,34 +49,7 @@ class _HomePageState extends State<HomePage> {
     return items;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: AppBar(
-        title: Breadcrumb(
-          items: _createBreadcrumbItems(),
-        ),
-        backgroundColor: colorScheme.surface,
-      ),
-      drawer: _buildDrawer(context),
-      body: Center(
-        child: PageView(
-          controller: _pageController,
-          children: [
-            ToolsPage(
-              selectedCollection: _selectedCollection,
-              onCollectionSelected: _onCollectionSelected,
-            ),
-            LayoutsPage(),
-          ]
-        ),
-      ),
-    );
-  }
-
-  Widget _drawerHeader(BuildContext context) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
+  Widget _drawerHeader() {
     return DrawerHeader(
       child: Stack(
         children: [
@@ -119,12 +92,45 @@ class _HomePageState extends State<HomePage> {
             });
           },
           children: [
-            _drawerHeader(context),
+            _drawerHeader(),
             const NavigationDrawerDestination(icon: Icon(Icons.construction_rounded), label: Text('Tools')),
             const NavigationDrawerDestination(icon: Icon(Icons.space_dashboard_rounded), label: Text('Layouts')),
           ]
         ),
       ],
     );
-  }}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: AppBar(
+        title: Breadcrumb(
+          items: _createBreadcrumbItems(),
+        ),
+        backgroundColor: colorScheme.surface,
+      ),
+      drawer: _buildDrawer(context),
+      body: Center(
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (int index) {
+            setState(() {
+              _selectedPage = index;
+            });
+          },
+          children: [
+            ToolsPage(
+              selectedCollection: _selectedCollection,
+              onCollectionSelected: _onCollectionSelected,
+            ),
+            LayoutsPage(),
+          ]
+        ),
+      ),
+    );
+  }
+
+}
 

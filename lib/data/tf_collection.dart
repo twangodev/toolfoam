@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:toolfoam/util/organization_structure.dart';
 import 'package:path/path.dart' as p;
 import 'package:toolfoam/util/storage_file_system.dart';
 
+import 'metadata.dart';
+
 class TFCollection {
 
   String name;
-  bool starred = false;
 
   TFCollection(this.name);
 
@@ -54,12 +56,46 @@ class TFCollection {
     name = newName;
   }
 
-  void star() {
-    starred = true;
+  Future<Metadata> getMetadata() async {
+    File metadataFile = await StorageFileSystem.buildFile(await _getDirectory(), OrganizationStructure.metadata);
+    if (await metadataFile.exists()) {
+      String metadata = await StorageFileSystem.readFromFile(metadataFile);
+      Map<String, dynamic> metadataMap = jsonDecode(metadata);
+      return Metadata.fromJson(metadataMap);
+    } else {
+      Metadata metadata = Metadata.empty();
+      writeMetadata(metadata);
+      return metadata;
+    }
   }
 
-  void unstar() {
-    starred = false;
+  Future writeMetadata(Metadata metadata) async {
+    File metadataFile = await StorageFileSystem.buildFile(await _getDirectory(), OrganizationStructure.metadata);
+    await StorageFileSystem.writeToFile(metadataFile, jsonEncode(metadata));
+  }
+
+  Future<bool> isStarred() async {
+    return (await getMetadata()).starred;
+  }
+
+  Future _setStarState(bool starred) async {
+    Metadata metadata = await getMetadata();
+    metadata.starred = starred;
+    await writeMetadata(metadata);
+  }
+
+  Future star() async {
+    await _setStarState(true);
+  }
+
+  Future unstar() async{
+    await _setStarState(false);
+  }
+
+  Future syncTimestamp(String lastChangedDescriptor) async {
+    Metadata metadata = await getMetadata();
+    metadata.lastUpdate = DateTime.now();
+    await writeMetadata(metadata);
   }
 
   @override

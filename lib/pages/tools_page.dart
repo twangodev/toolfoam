@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:toolfoam/widgets/containers/required_active_collection_container.dart';
-import 'package:toolfoam/widgets/toolbars/organization_toolbar.dart';
+import 'package:toolfoam/widgets/preview_card.dart';
+import 'package:toolfoam/widgets/toolbars/organizer.dart';
 
 import '../data/tf_collection.dart';
 
@@ -27,12 +28,30 @@ class _ToolsPageState extends State<ToolsPage> {
       onCollectionSelected: widget.onCollectionSelected,
       child: Card(
         color: colorScheme.surfaceContainerLow,
-        child: Column(
-          children: [
-            OrganizationToolbar(title: 'Tools', addItemTooltip: 'Add a new tool', onAddFolder: () {}, onAddItem: () {}),
-            Image.asset('assets/images/pattern.png')
-          ]
-        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              Organizer(title: 'Tools', addItemTooltip: 'Add a new tool', onAddFolder: () {}, onAddItem: () {}),
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    GridView.count(
+                      shrinkWrap: true,
+                      crossAxisCount: 4,
+                      childAspectRatio: 1.35,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (int i = 0; i < 20; i++) PreviewCard()
+                      ],
+                    )
+                  ]
+              ),
+              )
+            ]
+          ),
+        )
       )
     );
   }

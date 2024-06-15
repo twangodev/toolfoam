@@ -23,4 +23,12 @@ class StorageFileSystem {
     return dir.listSync().whereType<Directory>().toList();
   }
 
+  static Future writeToFile(File file, String data) async {
+    await file.writeAsString(data);
+  }
+
+  static Future<String> readFromFile(File file) async {
+    return await file.readAsString();
+  }
+
 }

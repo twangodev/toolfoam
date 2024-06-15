@@ -1,4 +1,5 @@
 class OrganizationStructure {
+  static const String metadata = "metadata.json";
   static const String extension = ".tfoam";
 
   static const String tools = 'tools';

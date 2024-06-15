@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class OrganizationToolbar extends StatelessWidget {
+class Organizer extends StatelessWidget {
 
   final String title;
   final String addItemTooltip;
   final Function() onAddFolder;
   final Function() onAddItem;
 
-  const OrganizationToolbar({
+  const Organizer({
     super.key,
     required this.title,
     required this.addItemTooltip,
@@ -19,7 +19,7 @@ class OrganizationToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           Row(

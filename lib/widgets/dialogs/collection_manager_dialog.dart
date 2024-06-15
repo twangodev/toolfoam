@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/data/tf_collection.dart';
 import 'package:logging/logging.dart';
+import 'package:relative_time/relative_time.dart';
+
+import '../../data/metadata.dart';
 
 class CollectionManagerDialog extends StatefulWidget {
 
   const CollectionManagerDialog({super.key, required this.selectedCollection, required this.onCollectionSelected});
   final TFCollection? Function() selectedCollection;
-  final Function(TFCollection?) onCollectionSelected;
+  final ValueChanged<TFCollection?> onCollectionSelected;
 
   @override
   State<CollectionManagerDialog> createState() => _CollectionManagerDialogState();
@@ -113,7 +116,8 @@ class CollectionCard extends StatefulWidget {
   final Function(TFCollection?) onCollectionSelected;
   final Function() onDelete;
 
-  const CollectionCard({super.key,
+  const CollectionCard({
+    super.key,
     required this.collection,
     required this.shouldNullifySelectedUponDelete,
     required this.onCollectionSelected,
@@ -129,16 +133,47 @@ class _CollectionCardState extends State<CollectionCard> {
 
   Logger log = Logger('CollectionCard');
 
-  late bool starred;
+  bool hasSynced = false;
+  bool starred = false;
+  int toolCount = 0;
+  int layoutCount = 0;
+  DateTime createdAt = DateTime.now();
+  DateTime lastUpdate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    starred = widget.collection.starred;
+
+    syncMetadata();
+  }
+
+  void syncMetadata() async {
+    bool syncStarred = await widget.collection.isStarred();
+    Metadata metadata = await widget.collection.getMetadata();
+
+    setState(() {
+      starred = syncStarred;
+      createdAt = metadata.createdAt;
+      lastUpdate = metadata.lastUpdate;
+
+      hasSynced = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!hasSynced) {
+      return const Card(
+        margin: EdgeInsets.all(8),
+        child: ListTile(
+          title: Text('Loading...'),
+          subtitle: Text('Please wait while we load the collection data'),
+        )
+      );
+    }
+
+    String lastChangedDescriptor = (lastUpdate.isAfter(createdAt)) ? 'Last updated' : 'Created';
+
     return Card(
       margin: const EdgeInsets.all(8),
       child: ListTile(
@@ -146,7 +181,7 @@ class _CollectionCardState extends State<CollectionCard> {
           widget.onCollectionSelected(widget.collection);
         },
         title: Text(widget.collection.name, style: const TextStyle(fontSize: 18)),
-        subtitle: const Text('Tools: 0, Layouts: 0 - Last updated: 1/1/2022', style: TextStyle(fontSize: 12)),
+        subtitle: Text('Tools: $toolCount, Layouts: $layoutCount - $lastChangedDescriptor ${lastUpdate.relativeTime(context)}', style: const TextStyle(fontSize: 12)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
