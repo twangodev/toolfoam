@@ -5,7 +5,6 @@ import 'package:toolfoam/widgets/breadcrumb.dart';
 import 'package:toolfoam/widgets/buttons/collection_manager_button.dart';
 
 import '../data/tf_collection.dart';
-import '../widgets/dialogs/collection_manager_dialog.dart';
 
 class HomePage extends StatefulWidget {
 

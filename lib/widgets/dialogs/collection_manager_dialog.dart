@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:toolfoam/data/tf_collection.dart';
 import 'package:logging/logging.dart';
 import 'package:relative_time/relative_time.dart';
+import 'package:toolfoam/data/tf_collection.dart';
 
 import '../../data/metadata.dart';
 
