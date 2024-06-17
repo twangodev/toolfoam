@@ -30,7 +30,7 @@ class RenameableTitle extends StatelessWidget {
             onRename?.call(text);
           }
         },
-        style: textStyle ?? TextStyle(color: colorScheme.onSurface),
+        style: textStyle ?? TextStyle(color: colorScheme.onSurface, fontSize: 20),
         controller: TextEditingController(text: title)..selection = TextSelection.fromPosition(TextPosition(offset: title.length)),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -45,7 +45,7 @@ class RenameableTitle extends StatelessWidget {
               color: Colors.transparent,
             ),
           ),
-          contentPadding: contentPadding ?? const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          contentPadding: contentPadding ?? const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
         ),
         inputFormatters: [
           FilteringTextInputFormatter.deny(RegExp('["*<>?|/:\\\\]')),

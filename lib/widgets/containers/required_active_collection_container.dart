@@ -34,7 +34,7 @@ class RequiredActiveCollectionContainerWidget extends StatelessWidget {
       );
     }
 
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(8.0),
       child: child,
     );

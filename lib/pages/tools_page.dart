@@ -28,11 +28,21 @@ class _ToolsPageState extends State<ToolsPage> {
       onCollectionSelected: widget.onCollectionSelected,
       child: Card(
         color: colorScheme.surfaceContainerLow,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        elevation: 0,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             children: [
-              Organizer(title: 'Tools', addItemTooltip: 'Add a new tool', onAddFolder: () {}, onAddItem: () {}),
+              Organizer(
+                title: 'Tools',
+                addItemTooltip: 'Add a new tool',
+                onAddFolder: () {
+                  throw UnimplementedError();
+                },
+                onAddItem: () {
+                  throw UnimplementedError();
+                }
+              ),
               Expanded(
                 child: ListView(
                   shrinkWrap: true,
@@ -40,10 +50,10 @@ class _ToolsPageState extends State<ToolsPage> {
                     GridView.count(
                       shrinkWrap: true,
                       crossAxisCount: 4,
-                      childAspectRatio: 1.35,
+                      childAspectRatio: 16/9,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        for (int i = 0; i < 20; i++) PreviewCard()
+                        for (int i = 0; i < 20; i++) const PreviewCard()
                       ],
                     )
                   ]

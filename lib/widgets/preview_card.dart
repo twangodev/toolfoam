@@ -18,16 +18,49 @@ class _PreviewCardState extends State<PreviewCard> {
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Card(
+      elevation: 1,
       color: colorScheme.surfaceContainerHigh,
-      child: const Column(
+      child: Column(
         children: [
-          Row(
-            children: [
-              Text("womp womp")
-            ]
+          Container(
+            height: 38,
+            padding: const EdgeInsets.only(left: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: RenameableTitle(
+                      title: 'Tool Name',
+                      onRename: (String text) {  },
+                    )
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.star), onPressed: () {  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.more_vert), onPressed: () {  },
+                )
+              ]
+            )
           ),
+          Expanded(
+            flex: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12)
+                ),
+                color: colorScheme.surfaceContainer,
+              ),
+            )
+          )
         ]
-      ),
+      )
     );
   }
 

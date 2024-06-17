@@ -52,6 +52,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData mediaQuery = MediaQuery.of(context);
     return Dialog(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -87,19 +88,36 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
                 ],
               ),
             ),
-            Column(
-              children: collections.map((collection) => CollectionCard(
-                collection: collection,
-                shouldNullifySelectedUponDelete: () => widget.selectedCollection() == collection,
-                onCollectionSelected: (TFCollection? collection) {
-                widget.onCollectionSelected(collection);
-                _dismiss();
-              }, onDelete: () {
-                collection.delete();
-                setState(() {
-                  collections = collections.where((element) => element != collection).toList();
-                });
-              })).toList()
+            Container(
+              constraints: BoxConstraints(maxHeight: mediaQuery.size.height * 0.5),
+              padding: const EdgeInsets.only(bottom: 10),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: collections.length,
+                prototypeItem: CollectionCard(
+                    collection: TFCollection('Prototype'),
+                    shouldNullifySelectedUponDelete: () => false,
+                    onCollectionSelected: (TFCollection? collection) {},
+                    onDelete: () {}
+                ),
+                itemBuilder: (context, index) {
+                  TFCollection collection = collections[index];
+                  return CollectionCard(
+                    collection: collection,
+                    shouldNullifySelectedUponDelete: () => widget.selectedCollection() == collection,
+                    onCollectionSelected: (TFCollection? collection) {
+                      widget.onCollectionSelected(collection);
+                      _dismiss();
+                    },
+                    onDelete: () {
+                      collection.delete();
+                      setState(() {
+                        collections = collections.where((element) => element != collection).toList();
+                      });
+                    }
+                  );
+                }
+              )
             )
           ]
         )
