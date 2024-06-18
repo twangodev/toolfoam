@@ -13,83 +13,85 @@ class TFCollection {
 
   TFCollection(this.name);
 
+  static Future<Directory> _getCollectionsDirectory() async {
+    return await StorageFileSystem.buildDirectory(await StorageFileSystem.getStorage(), OrganizationStructure.collections);
+  }
+
+  Future<Directory> _getCollection() async {
+    return await StorageFileSystem.buildDirectory(await _getCollectionsDirectory(), name);
+  }
+
+  Future<Directory> _buildDirectoryFromCollection(String path) async {
+    return await StorageFileSystem.buildDirectory(await _getCollection(), path);
+  }
+
   static Future<List<TFCollection>> list() async {
-      List<Directory> collections = await StorageFileSystem.listDirectories("");
+    Directory collectionsDirectory = await _getCollectionsDirectory();
+    if (!await collectionsDirectory.exists()) {
+      await collectionsDirectory.create();
+      return [];
+    }
+    List<Directory> collections = await StorageFileSystem.listDirectories(collectionsDirectory);
     return collections.map((dir) => TFCollection(p.basename(dir.path))).toList();
   }
 
-  Future<Directory> _getDirectory() async {
-    return await StorageFileSystem.buildDirectory(name);
-  }
-
   Future<Directory> _getToolsDirectory() async {
-    return await StorageFileSystem.buildDirectory(p.join(name, OrganizationStructure.tools));
+    return await _buildDirectoryFromCollection(OrganizationStructure.tools);
   }
 
   Future<Directory> _getLayoutsDirectory() async {
-    return await StorageFileSystem.buildDirectory(p.join(name, OrganizationStructure.layouts));
+    return await _buildDirectoryFromCollection(OrganizationStructure.layouts);
+  }
+
+  Future<File> _getMetadataFile() async {
+    return await StorageFileSystem.buildFile(await _getCollection(), OrganizationStructure.metadata);
   }
 
   Future<bool> exists() async {
-    Directory dir = await _getDirectory();
+    Directory dir = await _getCollection();
     return dir.exists();
   }
 
   Future create() async {
-    assert (!await exists());
-
-    (await _getDirectory()).create();
+    Directory collections = await _getCollectionsDirectory();
+    if (!await collections.exists()) {
+      await collections.create();
+    }
+    (await _getCollection()).create();
     (await _getToolsDirectory()).create();
     (await _getLayoutsDirectory()).create();
+    await _initMetadata();
+  }
+
+  Future<Metadata> _initMetadata() async {
+    Metadata metadata = Metadata.empty();
+    await writeMetadata(metadata);
+    return metadata;
   }
 
   void delete() async {
-    assert (await exists());
-
-    (await _getDirectory()).delete(recursive: true);
+    (await _getCollection()).delete(recursive: true);
   }
 
   void rename(String newName) async {
-    assert (await exists());
-
-    (await _getDirectory()).rename(newName);
+    (await _getCollection()).rename(newName);
     name = newName;
   }
 
   Future<Metadata> getMetadata() async {
-    File metadataFile = await StorageFileSystem.buildFile(await _getDirectory(), OrganizationStructure.metadata);
+    File metadataFile = await _getMetadataFile();
     if (await metadataFile.exists()) {
       String metadata = await StorageFileSystem.readFromFile(metadataFile);
       Map<String, dynamic> metadataMap = jsonDecode(metadata);
       return Metadata.fromJson(metadataMap);
     } else {
-      Metadata metadata = Metadata.empty();
-      writeMetadata(metadata);
-      return metadata;
+      return _initMetadata();
     }
   }
 
   Future writeMetadata(Metadata metadata) async {
-    File metadataFile = await StorageFileSystem.buildFile(await _getDirectory(), OrganizationStructure.metadata);
+    File metadataFile = await StorageFileSystem.buildFile(await _getCollection(), OrganizationStructure.metadata);
     await StorageFileSystem.writeToFile(metadataFile, jsonEncode(metadata));
-  }
-
-  Future<bool> isStarred() async {
-    return (await getMetadata()).starred;
-  }
-
-  Future _setStarState(bool starred) async {
-    Metadata metadata = await getMetadata();
-    metadata.starred = starred;
-    await writeMetadata(metadata);
-  }
-
-  Future star() async {
-    await _setStarState(true);
-  }
-
-  Future unstar() async{
-    await _setStarState(false);
   }
 
   Future syncTimestamp(String lastChangedDescriptor) async {

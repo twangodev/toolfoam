@@ -95,7 +95,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
                 shrinkWrap: true,
                 itemCount: collections.length,
                 prototypeItem: CollectionCard(
-                    collection: TFCollection('Prototype'),
+                    collection: null,
                     shouldNullifySelectedUponDelete: () => false,
                     onCollectionSelected: (TFCollection? collection) {},
                     onDelete: () {}
@@ -129,7 +129,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
 
 class CollectionCard extends StatefulWidget {
 
-  final TFCollection collection;
+  final TFCollection? collection;
   final bool Function() shouldNullifySelectedUponDelete;
   final Function(TFCollection?) onCollectionSelected;
   final Function() onDelete;
@@ -166,11 +166,9 @@ class _CollectionCardState extends State<CollectionCard> {
   }
 
   void syncMetadata() async {
-    bool syncStarred = await widget.collection.isStarred();
-    Metadata metadata = await widget.collection.getMetadata();
+    Metadata metadata = await widget.collection?.getMetadata() ?? Metadata.empty();
 
     setState(() {
-      starred = syncStarred;
       createdAt = metadata.createdAt;
       lastUpdate = metadata.lastUpdate;
 
@@ -198,25 +196,15 @@ class _CollectionCardState extends State<CollectionCard> {
         onTap: () {
           widget.onCollectionSelected(widget.collection);
         },
-        title: Text(widget.collection.name, style: const TextStyle(fontSize: 18)),
+        title: Text(widget.collection?.name ?? 'Placeholder Name', style: const TextStyle(fontSize: 18)),
         subtitle: Text('Tools: $toolCount, Layouts: $layoutCount - $lastChangedDescriptor ${lastUpdate.relativeTime(context)}', style: const TextStyle(fontSize: 12)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(onPressed: () {
-              setState(() {
-                if (starred) {
-                  widget.collection.unstar();
-                } else {
-                  widget.collection.star();
-                }
-                starred = !starred;
-              });
-            }, icon: Icon((starred) ? Icons.star : Icons.star_border)),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                log.info("Deleting collection ${widget.collection.name}");
+                log.info('Deleting collection ${widget.collection?.name ?? 'null'}');
                 if (widget.shouldNullifySelectedUponDelete()) {
                   widget.onCollectionSelected(null);
                 }

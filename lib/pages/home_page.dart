@@ -5,6 +5,7 @@ import 'package:toolfoam/widgets/breadcrumb.dart';
 import 'package:toolfoam/widgets/buttons/collection_manager_button.dart';
 
 import '../data/tf_collection.dart';
+import '../widgets/animation_timings.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -20,7 +21,12 @@ class _HomePageState extends State<HomePage> {
   int? _selectedPage = 0;
   TFCollection? _selectedCollection;
 
+  _dismiss() {
+    Navigator.of(context).pop();
+  }
+
   _onCollectionSelected(TFCollection? collection) {
+    _dismiss();
     setState(() {
       _selectedCollection = collection;
     });
@@ -28,7 +34,7 @@ class _HomePageState extends State<HomePage> {
 
   List<BreadcrumbItem> _createBreadcrumbItems() {
     List<BreadcrumbItem> items = [];
-    items.add(BreadcrumbItem(text: "Toolfoam", onTap: () {
+    items.add(BreadcrumbItem(text: 'Toolfoam', onTap: () {
       _onCollectionSelected(null);
     }));
 
@@ -86,8 +92,9 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _selectedPage = index;
               _pageController.animateToPage(index,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut);
+                duration: AnimationDurations.normal,
+                curve: Curves.easeInOut
+              );
             });
           },
           children: [
@@ -124,7 +131,10 @@ class _HomePageState extends State<HomePage> {
               selectedCollection: _selectedCollection,
               onCollectionSelected: _onCollectionSelected,
             ),
-            LayoutsPage(),
+            LayoutsPage(
+              selectedCollection: _selectedCollection,
+              onCollectionSelected: _onCollectionSelected,
+            ),
           ]
         ),
       ),

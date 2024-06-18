@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/widgets/containers/required_active_collection_container.dart';
-import 'package:toolfoam/widgets/preview_card.dart';
+import 'package:toolfoam/widgets/item_card.dart';
 import 'package:toolfoam/widgets/toolbars/organizer.dart';
 
 import '../data/tf_collection.dart';
@@ -14,6 +14,7 @@ class ToolsPage extends StatefulWidget {
 
   @override
   State<ToolsPage> createState() => _ToolsPageState();
+
 }
 
 class _ToolsPageState extends State<ToolsPage> {
@@ -51,7 +52,12 @@ class _ToolsPageState extends State<ToolsPage> {
                       childAspectRatio: 16/9,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        for (int i = 0; i < 20; i++) const PreviewCard()
+                        for (int i = 0; i < 20; i++) ItemCard(
+                          preview: null,
+                          onTap: () {
+
+                          }
+                        )
                       ],
                     )
                   ]

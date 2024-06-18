@@ -12,9 +12,9 @@ class TFTool {
 
   TFTool({required this.name, required this.parentDirectory});
 
-  TFTool.fromJson(Map<String, dynamic> json, {required this.parentDirectory})
-      : name = json['name'],
-        metadata = Metadata.fromJson(json['metadata']);
+  TFTool.fromJson(Map<String, dynamic> json, this.parentDirectory):
+    name = json['name'],
+    metadata = Metadata.fromJson(json['metadata']);
 
   Map<String, dynamic> toJson() => {
     'name': name,
@@ -36,12 +36,13 @@ class TFTool {
   }
 
   Future fromDiskState() async {
+
     assert (await exists());
 
     File file = await _getFile();
     String json = await StorageFileSystem.readFromFile(file);
     Map<String, dynamic> jsonMap = jsonDecode(json);
-    TFTool diskTool = TFTool.fromJson(jsonMap, parentDirectory: parentDirectory);
+    TFTool diskTool = TFTool.fromJson(jsonMap, parentDirectory);
 
     copy(diskTool);
   }
