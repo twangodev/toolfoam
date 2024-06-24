@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/tf_collection.dart';
+import '../../models/tf_collection.dart';
 import '../dialogs/collection_manager_dialog.dart';
 
 class CollectionManagerButton extends StatelessWidget {

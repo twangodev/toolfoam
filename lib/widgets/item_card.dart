@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:toolfoam/widgets/renameable_title.dart';
@@ -7,10 +6,22 @@ import 'animation_timings.dart';
 
 class ItemCard extends StatefulWidget {
 
-  Widget? preview;
-  VoidCallback onTap;
+  final String name;
+  final Widget? preview;
+  final VoidCallback onTap;
+  final void Function(String text) onRename;
+  final VoidCallback onDetails;
+  final VoidCallback onDelete;
 
-  ItemCard({super.key, required this.preview, required this.onTap});
+  const ItemCard({
+    super.key,
+    required this.name,
+    required this.preview,
+    required this.onTap,
+    required this.onRename,
+    required this.onDetails,
+    required this.onDelete,
+  });
 
   @override
   State<ItemCard> createState() => _ItemCardState();
@@ -19,7 +30,42 @@ class ItemCard extends StatefulWidget {
 
 class _ItemCardState extends State<ItemCard> {
 
+  String name = '';
   bool hovering = false;
+
+  void onRename(String newName) {
+    widget.onRename(newName);
+
+    setState(() {
+      name = newName;
+    });
+  }
+
+  MenuItemButton generateMenuItemButton(BuildContext context, Icon icon, String text, VoidCallback onPressed) {
+    return generateFullMenuItemButton(context, icon, text, false, onPressed);
+  }
+
+  MenuItemButton generateFullMenuItemButton(BuildContext context, Icon icon, String text, bool isError, VoidCallback onPressed) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return MenuItemButton(
+      leadingIcon: icon,
+      onPressed: onPressed,
+      style: isError ? ElevatedButton.styleFrom(
+        overlayColor: colorScheme.error,
+      ) : null,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8, top: 4, bottom: 4),
+        child: Text(text, style: const TextStyle(fontSize: 14)),
+      ),
+    );
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    name = widget.name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +91,25 @@ class _ItemCardState extends State<ItemCard> {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: RenameableTitle(
-                      title: 'Tool Name',
-                      onRename: (String text) {  },
+                      title: name,
+                      onRename: onRename,
                     )
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.more_vert), onPressed: () {  },
+                MenuAnchor(
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return IconButton(
+                      icon: const Icon(Icons.more_vert_rounded),
+                      onPressed: () {
+                        if (controller.isOpen) { controller.close(); }
+                        else { controller.open(); }
+                      }
+                    );
+                  },
+                  menuChildren: [
+                    generateMenuItemButton(context, const Icon(Icons.info_outline_rounded), 'Details', widget.onDetails),
+                    generateFullMenuItemButton(context, const Icon(Icons.delete_outline_rounded), 'Delete', true, widget.onDelete),
+                  ],
                 )
               ]
             )
@@ -76,7 +134,7 @@ class _ItemCardState extends State<ItemCard> {
                   });
                 },
                 child: GestureDetector(
-                  onTap: () {  },
+                  onTap: widget.onTap,
                   child: Stack(
                     children: [
                       previewContents,

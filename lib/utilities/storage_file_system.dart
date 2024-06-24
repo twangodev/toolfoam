@@ -9,17 +9,21 @@ class StorageFileSystem {
     return await getApplicationSupportDirectory();
   }
 
-  static Future<Directory> buildDirectory(Directory dir, String path) async {
+  static Directory buildDirectory(Directory dir, String path) {
     return Directory(p.join(dir.path, path));
   }
 
-  static Future<File> buildFile(Directory directory, String filename) async {
+  static File buildFile(Directory directory, String filename) {
     return File(p.join(directory.path, filename));
   }
 
-  static Future<List<Directory>> listDirectories(Directory dir) async {
+  static File buildFileWithExtension(Directory directory, String filename, String extension) {
+    return buildFile(directory, p.setExtension(filename, extension));
+  }
+
+  static Future<List<T>> list<T>(Directory dir) async {
     List<FileSystemEntity> entities = await dir.list().toList();
-    return entities.whereType<Directory>().toList();
+    return entities.whereType<T>().toList();
   }
 
   static Future writeToFile(File file, String data) async {

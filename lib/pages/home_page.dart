@@ -4,52 +4,58 @@ import 'package:toolfoam/pages/tools_page.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';
 import 'package:toolfoam/widgets/buttons/collection_manager_button.dart';
 
-import '../data/tf_collection.dart';
+import '../models/tf_collection.dart';
 import '../widgets/animation_timings.dart';
 
 class HomePage extends StatefulWidget {
 
+  const HomePage({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 
 }
 
 class _HomePageState extends State<HomePage> {
 
   final _pageController = PageController();
+  final TextBreadcrumbItem _headerBreadcrumbItem = const TextBreadcrumbItem(text: 'Toolfoam');
 
-  int? _selectedPage = 0;
-  TFCollection? _selectedCollection;
-
-  _dismiss() {
-    Navigator.of(context).pop();
-  }
+  String? name;
+  int? selectedPage = 0;
+  TFCollection? selectedCollection;
+  List<BreadcrumbItem> breadcrumbItems = [];
 
   _onCollectionSelected(TFCollection? collection) {
-    _dismiss();
     setState(() {
-      _selectedCollection = collection;
+      selectedCollection = collection;
     });
+    syncCollectionDetails();
   }
 
   List<BreadcrumbItem> _createBreadcrumbItems() {
     List<BreadcrumbItem> items = [];
-    items.add(BreadcrumbItem(text: 'Toolfoam', onTap: () {
-      _onCollectionSelected(null);
-    }));
+    items.add(_headerBreadcrumbItem);
 
-    if (_selectedCollection == null) {
+    if (selectedCollection == null) {
       return items;
     }
 
-    items.add(BreadcrumbItem(text: _selectedCollection!.name, onTap: () {}));
+    items.add(
+      RenameableBreadcrumbItem(
+        text: name ?? selectedCollection?.uuid ?? 'Unknown Project',
+        onRename: (String newName) {
+          selectedCollection?.rename(newName);
+          syncCollectionDetails();
+        }
+      )
+    ); // TODO fix null name condition
 
-    if (_selectedPage == 0) {
-      items.add(BreadcrumbItem(text: "Tools", onTap: () {}));
-    } else if (_selectedPage == 1) {
-      items.add(BreadcrumbItem(text: "Layouts", onTap: () {}));
+    if (selectedPage == 0) {
+      items.add(TextBreadcrumbItem(text: 'Tools', onTap: () {}));
+    } else if (selectedPage == 1) {
+      items.add(TextBreadcrumbItem(text: 'Layouts', onTap: () {}));
     }
-
 
     return items;
   }
@@ -64,7 +70,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(_selectedCollection?.name ?? 'Toolfoam',
+                  child: Text(name ?? 'Toolfoam',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w500,
@@ -72,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                   )
                 ),
                 CollectionManagerButton(
-                  selectedCollection: _selectedCollection,
+                  selectedCollection: selectedCollection,
                   onCollectionSelected: _onCollectionSelected,
                 )
               ]
@@ -87,10 +93,10 @@ class _HomePageState extends State<HomePage> {
     return Stack(
       children: [
         NavigationDrawer(
-          selectedIndex: _selectedPage,
+          selectedIndex: selectedPage,
           onDestinationSelected: (int index) {
             setState(() {
-              _selectedPage = index;
+              selectedPage = index;
               _pageController.animateToPage(index,
                 duration: AnimationDurations.normal,
                 curve: Curves.easeInOut
@@ -107,14 +113,28 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void syncCollectionDetails() async {
+    String? updatedName = await selectedCollection?.getName();
+
+    setState(() {
+      name = updatedName;
+      breadcrumbItems = _createBreadcrumbItems();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    syncCollectionDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Breadcrumb(
-          items: _createBreadcrumbItems(),
-        ),
+        title: Breadcrumb(items: breadcrumbItems),
         backgroundColor: colorScheme.surface,
       ),
       drawer: _buildDrawer(context),
@@ -123,16 +143,17 @@ class _HomePageState extends State<HomePage> {
           controller: _pageController,
           onPageChanged: (int index) {
             setState(() {
-              _selectedPage = index;
+              selectedPage = index;
             });
           },
           children: [
             ToolsPage(
-              selectedCollection: _selectedCollection,
+              selectedCollection: selectedCollection,
               onCollectionSelected: _onCollectionSelected,
+              breadcrumbItems: breadcrumbItems,
             ),
             LayoutsPage(
-              selectedCollection: _selectedCollection,
+              selectedCollection: selectedCollection,
               onCollectionSelected: _onCollectionSelected,
             ),
           ]

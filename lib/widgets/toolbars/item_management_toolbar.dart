@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Organizer extends StatelessWidget {
+class ItemManagementToolbar extends StatelessWidget {
 
   final String title;
   final String addItemTooltip;
   final Function() onAddFolder;
   final Function() onAddItem;
 
-  const Organizer({
+  const ItemManagementToolbar({
     super.key,
     required this.title,
     required this.addItemTooltip,

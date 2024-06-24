@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:relative_time/relative_time.dart';
-import 'package:toolfoam/data/tf_collection.dart';
+import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.dart';
 
-import '../../data/metadata.dart';
+import '../../models/entity.dart';
+import '../../models/metadata.dart';
+import '../../models/tf_collection.dart';
 
 class CollectionManagerDialog extends StatefulWidget {
 
@@ -27,19 +29,18 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
   }
 
   void _createCollection() async {
-    TFCollection tfc = TFCollection(_searchController.text);
-    await tfc.create();
+    TFCollection tfc = TFCollection(uuid: Entity.uuidGenerator.v4());
+    await tfc.create(_searchController.text);
 
     _searchController.clear();
     _searchFocus.requestFocus();
     _refreshCollections();
   }
 
-  void _refreshCollections() {
-    TFCollection.list().then((value) {
-      setState(() {
-        collections = value;
-      });
+  void _refreshCollections() async {
+    List<TFCollection> updatedCollections = await TFCollection.list();
+    setState(() {
+      collections = updatedCollections;
     });
   }
 
@@ -55,7 +56,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
     MediaQueryData mediaQuery = MediaQuery.of(context);
     return Dialog(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -150,7 +151,7 @@ class CollectionCard extends StatefulWidget {
 class _CollectionCardState extends State<CollectionCard> {
 
   Logger log = Logger('CollectionCard');
-
+  String? name;
   bool hasSynced = false;
   bool starred = false;
   int toolCount = 0;
@@ -169,8 +170,9 @@ class _CollectionCardState extends State<CollectionCard> {
     Metadata metadata = await widget.collection?.getMetadata() ?? Metadata.empty();
 
     setState(() {
+      name = metadata.name;
       createdAt = metadata.createdAt;
-      lastUpdate = metadata.lastUpdate;
+      lastUpdate = metadata.lastModified;
 
       hasSynced = true;
     });
@@ -188,7 +190,8 @@ class _CollectionCardState extends State<CollectionCard> {
       );
     }
 
-    String lastChangedDescriptor = (lastUpdate.isAfter(createdAt)) ? 'Last updated' : 'Created';
+    String lastChangedDescriptor = (lastUpdate.isAfter(createdAt)) ? 'Last Updated ' : 'Created ';
+    TextStyle subtitleStyle = const TextStyle(fontSize: 12);
 
     return Card(
       margin: const EdgeInsets.all(8),
@@ -196,15 +199,23 @@ class _CollectionCardState extends State<CollectionCard> {
         onTap: () {
           widget.onCollectionSelected(widget.collection);
         },
-        title: Text(widget.collection?.name ?? 'Placeholder Name', style: const TextStyle(fontSize: 18)),
-        subtitle: Text('Tools: $toolCount, Layouts: $layoutCount - $lastChangedDescriptor ${lastUpdate.relativeTime(context)}', style: const TextStyle(fontSize: 12)),
+        title: Text(name ?? 'Placeholder Name', style: const TextStyle(fontSize: 18)), // TODO null name condition
+        subtitle: Row(
+          children: [
+            Text('Tools: $toolCount, Layouts: $layoutCount - ', style: subtitleStyle),
+            TooltipRelativeDateText(
+              prefix: lastChangedDescriptor,
+              date: lastUpdate,
+              style: subtitleStyle,
+            )
+          ]
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: const Icon(Icons.delete_rounded),
               onPressed: () {
-                log.info('Deleting collection ${widget.collection?.name ?? 'null'}');
                 if (widget.shouldNullifySelectedUponDelete()) {
                   widget.onCollectionSelected(null);
                 }

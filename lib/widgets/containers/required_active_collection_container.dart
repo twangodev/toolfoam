@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/widgets/buttons/collection_manager_button.dart';
 
-import '../../data/tf_collection.dart';
+import '../../models/tf_collection.dart';
 
 class RequiredActiveCollectionContainerWidget extends StatelessWidget {
 

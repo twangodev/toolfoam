@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/widgets/containers/required_active_collection_container.dart';
 
-import '../data/tf_collection.dart';
+import '../models/tf_collection.dart';
 
 class LayoutsPage extends StatefulWidget {
 
