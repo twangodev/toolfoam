@@ -81,7 +81,7 @@ class TFCollection extends Entity {
     (await _getCollection()).delete(recursive: true);
   }
 
-  void rename(String newName) async {
+  Future rename(String newName) async {
     Metadata metadata = await getMetadata();
     metadata.name = newName;
     await writeMetadata(metadata);

@@ -44,8 +44,8 @@ class _HomePageState extends State<HomePage> {
     items.add(
       RenameableBreadcrumbItem(
         text: name ?? selectedCollection?.uuid ?? 'Unknown Project',
-        onRename: (String newName) {
-          selectedCollection?.rename(newName);
+        onRename: (String newName) async {
+          await selectedCollection?.rename(newName);
           syncCollectionDetails();
         }
       )
