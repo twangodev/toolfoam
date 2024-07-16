@@ -1,4 +1,4 @@
-extension DateTimeExtensions on DateTime {
+extension DateTimeExtensionsUtil on DateTime {
 
   static DateTime? safeParse(String? date) {
     if (date == null) {

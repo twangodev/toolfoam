@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:toolfoam/widgets/renameable_title.dart';
+import 'package:toolfoam/widgets/text/renameable_title.dart';
 
 import 'animation_timings.dart';
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:relative_time/relative_time.dart';
 import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.dart';
 
@@ -81,7 +82,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
                 },
                 trailing: [
                   IconButton(
-                    icon: const Icon(Icons.add),
+                    icon: const Icon(Icons.add_rounded),
                     onPressed: () {
                       _createCollection();
                     },

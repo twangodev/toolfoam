@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:toolfoam/models/tools/tf_tool.dart';
 
-import '../utilities/organization_structure.dart';
-import '../utilities/storage_file_system.dart';
+import '../data/organization_structure_data.dart';
+import '../utilities/storage_file_system_util.dart';
 import 'entity.dart';
 import 'metadata.dart';
 
@@ -14,15 +14,15 @@ class TFCollection extends Entity {
   TFCollection({required super.uuid});
 
   static Future<Directory> _getCollectionsDirectory() async {
-    return StorageFileSystem.buildDirectory(await StorageFileSystem.getStorage(), OrganizationStructure.collections);
+    return StorageFileSystemUtil.buildDirectory(await StorageFileSystemUtil.getStorage(), OrganizationStructureData.collections);
   }
 
   Future<Directory> _getCollection() async {
-    return StorageFileSystem.buildDirectory(await _getCollectionsDirectory(), uuid);
+    return StorageFileSystemUtil.buildDirectory(await _getCollectionsDirectory(), uuid);
   }
 
   Future<Directory> _buildDirectoryFromCollection(String path) async {
-    return StorageFileSystem.buildDirectory(await _getCollection(), path);
+    return StorageFileSystemUtil.buildDirectory(await _getCollection(), path);
   }
 
   static Future<List<TFCollection>> list() async {
@@ -31,25 +31,25 @@ class TFCollection extends Entity {
       await collectionsDirectory.create();
       return [];
     }
-    List<Directory> collections = await StorageFileSystem.list<Directory>(collectionsDirectory);
+    List<Directory> collections = await StorageFileSystemUtil.list<Directory>(collectionsDirectory);
     return collections.map((dir) => TFCollection(uuid: p.basename(dir.path))).toList();
   }
 
   Future<Directory> getToolsDirectory() async {
-    return await _buildDirectoryFromCollection(OrganizationStructure.tools);
+    return await _buildDirectoryFromCollection(OrganizationStructureData.tools);
   }
 
   Future<List<TFTool>> listTools() async {
-    List<File> files = await StorageFileSystem.list<File>(await getToolsDirectory());
+    List<File> files = await StorageFileSystemUtil.list<File>(await getToolsDirectory());
     return TFTool.fromFiles(files, this);
   }
 
   Future<Directory> getLayoutsDirectory() async {
-    return await _buildDirectoryFromCollection(OrganizationStructure.layouts);
+    return await _buildDirectoryFromCollection(OrganizationStructureData.layouts);
   }
 
   Future<File> _getMetadataFile() async {
-    return StorageFileSystem.buildFile(await _getCollection(), OrganizationStructure.metadata);
+    return StorageFileSystemUtil.buildFile(await _getCollection(), OrganizationStructureData.metadata);
   }
 
   @override
@@ -90,7 +90,7 @@ class TFCollection extends Entity {
   Future<Metadata> getMetadata() async {
     File metadataFile = await _getMetadataFile();
     if (await metadataFile.exists()) {
-      String rawJson = await StorageFileSystem.readFromFile(metadataFile);
+      String rawJson = await StorageFileSystemUtil.readFromFile(metadataFile);
       Map<String, dynamic> json = jsonDecode(rawJson);
       return Metadata.fromJson(json);
     } else {
@@ -103,8 +103,8 @@ class TFCollection extends Entity {
   }
 
   Future writeMetadata(Metadata metadata) async {
-    File metadataFile = StorageFileSystem.buildFile(await _getCollection(), OrganizationStructure.metadata);
-    await StorageFileSystem.writeToFile(metadataFile, jsonEncode(metadata));
+    File metadataFile = StorageFileSystemUtil.buildFile(await _getCollection(), OrganizationStructureData.metadata);
+    await StorageFileSystemUtil.writeToFile(metadataFile, jsonEncode(metadata));
   }
 
   Future syncTimestamp(String lastChangedDescriptor) async {

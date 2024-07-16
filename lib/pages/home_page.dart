@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:toolfoam/pages/layouts_page.dart';
 import 'package:toolfoam/pages/tools_page.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';
@@ -105,8 +107,8 @@ class _HomePageState extends State<HomePage> {
           },
           children: [
             _drawerHeader(),
-            const NavigationDrawerDestination(icon: Icon(Icons.construction_rounded), label: Text('Tools')),
-            const NavigationDrawerDestination(icon: Icon(Icons.space_dashboard_rounded), label: Text('Layouts')),
+            const NavigationDrawerDestination(icon: Icon(Icons.construction_rounded, fill: 1,), label: Text('Tools')),
+            const NavigationDrawerDestination(icon: Icon(Icons.space_dashboard_rounded, fill: 1), label: Text('Layouts')),
           ]
         ),
       ],

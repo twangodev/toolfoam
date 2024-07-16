@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-class StorageFileSystem {
+class StorageFileSystemUtil {
 
   static Future<Directory> getStorage() async {
     return await getApplicationSupportDirectory();

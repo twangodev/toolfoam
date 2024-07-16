@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:toolfoam/widgets/renameable_title.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:toolfoam/widgets/text/renameable_title.dart';
 
 class Breadcrumb extends StatelessWidget {
 
@@ -35,7 +36,7 @@ abstract class BreadcrumbItem {
 
   static TextStyle textStyle = const TextStyle(fontSize: 20);
 
-  final String text;
+  final String? text;
   Widget build(int position);
 
   const BreadcrumbItem({required this.text});
@@ -43,6 +44,7 @@ abstract class BreadcrumbItem {
 }
 
 class TextBreadcrumbItem extends BreadcrumbItem {
+  
   final VoidCallback? onTap;
 
   const TextBreadcrumbItem({required super.text, this.onTap});
@@ -58,7 +60,7 @@ class TextBreadcrumbItem extends BreadcrumbItem {
 
     return GestureDetector(
       onTap: onTap,
-      child: Text(text, style: TextStyle(fontSize: 20, fontWeight: weight)),
+      child: Text(text ?? '', style: TextStyle(fontSize: 20, fontWeight: weight)),
     );
   }
 
@@ -73,7 +75,7 @@ class RenameableBreadcrumbItem extends BreadcrumbItem {
   @override
   Widget build(int position) {
     return RenameableTitle(
-      title: text,
+      title: text ?? '',
       onRename: onRename,
       style: BreadcrumbItem.textStyle,
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),

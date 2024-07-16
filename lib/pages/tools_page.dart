@@ -44,7 +44,7 @@ class _ToolsPageState extends State<ToolsPage> {
   void onTap(BuildContext context, TFTool tool) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ToolEditorPage(breadcrumbItems: widget.breadcrumbItems,))
+      MaterialPageRoute(builder: (context) => ToolEditorPage(tool: tool))
     );
   }
 

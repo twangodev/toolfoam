@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:toolfoam/models/tools/tf_tool_data.dart';
 import 'package:toolfoam/models/tools/tf_tool_metadata.dart';
 
-import '../../utilities/organization_structure.dart';
-import '../../utilities/storage_file_system.dart';
+import '../../data/organization_structure_data.dart';
+import '../../utilities/storage_file_system_util.dart';
 import '../entity.dart';
 import '../json_serializable.dart';
 import '../tf_collection.dart';
@@ -13,6 +14,7 @@ class TFTool extends DiskIOEntity implements JsonSerializable {
 
   TFToolMetadata metadata = TFToolMetadata.empty();
   TFCollection owner;
+  TFToolData data = TFToolData();
 
   TFTool({required super.uuid, required this.owner});
 
@@ -20,7 +22,7 @@ class TFTool extends DiskIOEntity implements JsonSerializable {
     metadata = TFToolMetadata.fromJson(json['metadata']), super(uuid: uuid);
 
   static Future<TFTool> fromFile(File file, TFCollection owner) async {
-    String rawJson = await StorageFileSystem.readFromFile(file);
+    String rawJson = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> json = jsonDecode(rawJson);
     return TFTool.fromJson(json, file.path, owner);
   }
@@ -32,11 +34,12 @@ class TFTool extends DiskIOEntity implements JsonSerializable {
 
   @override
   Map<String, dynamic> toJson() => {
-    'metadata': metadata.toJson()
+    'metadata': metadata.toJson(),
+    'data': data.toJson(),
   };
 
   Future<File> _getFile() async {
-    return StorageFileSystem.buildFileWithExtension(await owner.getToolsDirectory(), uuid, OrganizationStructure.toolExtension);
+    return StorageFileSystemUtil.buildFileWithExtension(await owner.getToolsDirectory(), uuid, OrganizationStructureData.toolExtension);
   }
 
   @override
@@ -56,7 +59,7 @@ class TFTool extends DiskIOEntity implements JsonSerializable {
   @override
   Future<void> pull() async {
     File file = await _getFile();
-    String json = await StorageFileSystem.readFromFile(file);
+    String json = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> jsonMap = jsonDecode(json);
     TFTool diskTool = TFTool.fromJson(jsonMap, uuid, owner);
 
@@ -67,7 +70,7 @@ class TFTool extends DiskIOEntity implements JsonSerializable {
   Future<void> push() async {
     File file = await _getFile();
     String json = jsonEncode(toJson());
-    await StorageFileSystem.writeToFile(file, json);
+    await StorageFileSystemUtil.writeToFile(file, json);
   }
 
   @override
