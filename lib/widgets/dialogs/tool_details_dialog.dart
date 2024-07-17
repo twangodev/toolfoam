@@ -4,7 +4,7 @@ import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.da
 
 class ToolDetailsDialog extends StatelessWidget {
 
-  final TFTool tool;
+  final TfTool tool;
 
   const ToolDetailsDialog({super.key, required this.tool});
 

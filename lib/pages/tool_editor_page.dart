@@ -5,7 +5,7 @@ import 'package:toolfoam/widgets/editor/tf_editor.dart';
 
 class ToolEditorPage extends StatefulWidget {
 
-  final TFTool tool;
+  final TfTool tool;
 
   const ToolEditorPage({super.key, required this.tool});
 
@@ -40,7 +40,7 @@ class _ToolEditorPageState extends State<ToolEditorPage> {
         title: Breadcrumb(items: [RenameableBreadcrumbItem(text: name, onRename: onRename)])
       ),
       body: Center(
-        child: TFEditor(tool: widget.tool),
+        child: TfEditor(tool: widget.tool),
       ),
     );
   }

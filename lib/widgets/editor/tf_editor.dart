@@ -10,29 +10,29 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../../models/editing_tool.dart';
 
-class TFEditor extends StatefulWidget {
+class TfEditor extends StatefulWidget {
 
-  final TFTool tool;
+  final TfTool tool;
 
-  const TFEditor({super.key, required this.tool});
+  const TfEditor({super.key, required this.tool});
 
   @override
-  State<TFEditor> createState() => _TFEditorState();
+  State<TfEditor> createState() => _TfEditorState();
 
 }
 
-class _TFEditorState extends State<TFEditor> {
+class _TfEditorState extends State<TfEditor> {
 
   final TransformationController transformationController = TransformationController();
 
-  late final TFEditorData notifier = TFEditorData(data: widget.tool.data);
+  late final TfEditorData notifier = TfEditorData(data: widget.tool.data);
 
   Size viewerSize = Size.zero;
   bool allowPrimaryMouseButtonPan = false;
   bool initialMove = false;
 
   bool gridToggleState = false;
-  EditingTool activeEditingTool = TFEditorConfig.defaultTool;
+  EditingTool activeEditingTool = TfEditorConfig.defaultTool;
 
   void toggleGrid(bool newState) {
     setState(() {
@@ -45,6 +45,14 @@ class _TFEditorState extends State<TFEditor> {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
     });
+  }
+
+  void onPointerDown(PointerDownEvent event) {
+
+  }
+
+  void updatePointer(PointerEvent event) {
+    notifier.activePointer = transformationController.toScene(event.localPosition);
   }
 
   @override
@@ -72,7 +80,7 @@ class _TFEditorState extends State<TFEditor> {
         color: colorScheme.surfaceContainerLow,
         child: Column(
           children: [
-            TFEditorToolbar(
+            TfEditorToolbar(
               onToggleGrid: toggleGrid,
               setTool: setTool,
             ),
@@ -81,34 +89,28 @@ class _TFEditorState extends State<TFEditor> {
                 builder: (BuildContext context, BoxConstraints constraints) {
                   viewerSize = Size(constraints.maxWidth, constraints.maxHeight);
                   return Listener(
-                    onPointerDown: (PointerDownEvent event) {
-                      print('down $event');
-                    },
-                    onPointerMove: (PointerMoveEvent event) {
-                      notifier.activePointer = transformationController.toScene(event.localPosition);
-                    },
-                    onPointerHover: (PointerHoverEvent event) {
-                      notifier.activePointer = transformationController.toScene(event.localPosition);
-                    },
+                    onPointerDown: onPointerDown,
+                    onPointerMove: updatePointer,
+                    onPointerHover: updatePointer,
                     child: MouseRegion(
                       onExit: (PointerExitEvent event) {
                         notifier.activePointer = null;
                       },
                       cursor: activeEditingTool.preferredCursor,
-                      child: TFEditorInteractiveViewer.builder(
+                      child: TfEditorInteractiveViewer.builder(
                         boundaryMargin: const EdgeInsets.all(double.infinity),
-                        minScale: TFEditorConfig.minScale,
-                        maxScale: TFEditorConfig.maxScale,
+                        minScale: TfEditorConfig.minScale,
+                        maxScale: TfEditorConfig.maxScale,
                         transformationController: transformationController,
                         illegalMousePanSet: const {kPrimaryMouseButton},
                         ignoreIllegalMousePan: allowPrimaryMouseButtonPan,
-                        interactionEndFrictionCoefficient: TFEditorConfig.frictionCoefficient,
+                        interactionEndFrictionCoefficient: TfEditorConfig.frictionCoefficient,
                         builder: (BuildContext context, Quad viewport) {
                           return ListenableBuilder(
                             listenable: notifier,
                             builder: (BuildContext context, Widget? child) {
                               return CustomPaint(
-                                painter: TFEditorPainter(
+                                painter: TfEditorPainter(
                                   viewport: viewport,
                                   data: notifier,
                                   toggleGrid: gridToggleState,

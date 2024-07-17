@@ -26,10 +26,10 @@ class ToolsPage extends StatefulWidget {
 
 class _ToolsPageState extends State<ToolsPage> {
 
-  List<TFTool> tools = [];
+  List<TfTool> tools = [];
 
   void refreshTools() async {
-    List<TFTool>? updatedTools = await widget.selectedCollection?.listTools();
+    List<TfTool>? updatedTools = await widget.selectedCollection?.listTools();
 
     setState(() {
       tools = updatedTools ?? [];
@@ -37,28 +37,28 @@ class _ToolsPageState extends State<ToolsPage> {
   }
 
   void onAddTool() {
-    TFTool(uuid: Entity.uuidGenerator.v4(), owner: widget.selectedCollection!).create('New Tool');
+    TfTool(uuid: Entity.uuidGenerator.v4(), owner: widget.selectedCollection!).create('New Tool');
     refreshTools();
   }
 
-  void onTap(BuildContext context, TFTool tool) async {
+  void onTap(BuildContext context, TfTool tool) async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ToolEditorPage(tool: tool))
     );
   }
 
-  void renameTool(BuildContext context, TFTool tool, String name) {
+  void renameTool(BuildContext context, TfTool tool, String name) {
     tool.rename(name);
     tool.push();
   }
 
-  void onDelete(TFTool tool) {
+  void onDelete(TfTool tool) {
     tool.delete();
     refreshTools();
   }
 
-  void onDetails(BuildContext context, TFTool tool) {
+  void onDetails(BuildContext context, TfTool tool) {
     showDialog(context: context, builder: (context) => ToolDetailsDialog(tool: tool));
   }
 
@@ -111,7 +111,7 @@ class _ToolsPageState extends State<ToolsPage> {
                         childAspectRatio: 16/9,
                       ),
                       itemBuilder: (BuildContext context, int index) {
-                        TFTool tool = tools[index];
+                        TfTool tool = tools[index];
                         return ItemCard(
                           name: tool.metadata.name ?? 'Unnamed Tool',
                           preview: null,

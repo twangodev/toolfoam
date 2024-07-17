@@ -1,7 +1,7 @@
 import '../../utilities/date_time_extensions_util.dart';
 import '../metadata.dart';
 
-class TFToolMetadata extends Metadata {
+class TfToolMetadata extends Metadata {
 
   String? type;
   String? brand;
@@ -11,18 +11,18 @@ class TFToolMetadata extends Metadata {
   DateTime? purchaseDate;
   DateTime? warrantyExpirationDate;
 
-  TFToolMetadata({required super.name, required super.createdAt, required super.lastModified});
+  TfToolMetadata({required super.name, required super.createdAt, required super.lastModified});
 
-  factory TFToolMetadata.name(String? name) {
+  factory TfToolMetadata.name(String? name) {
     DateTime now = DateTime.now();
-    return TFToolMetadata(name: name, createdAt: now, lastModified: now);
+    return TfToolMetadata(name: name, createdAt: now, lastModified: now);
   }
 
-  factory TFToolMetadata.empty() {
-    return TFToolMetadata.name(null);
+  factory TfToolMetadata.empty() {
+    return TfToolMetadata.name(null);
   }
 
-  TFToolMetadata.fromJson(super.json) :
+  TfToolMetadata.fromJson(super.json) :
     type = json['type'],
     brand = json['brand'],
     modelNumber = json['modelNumber'],

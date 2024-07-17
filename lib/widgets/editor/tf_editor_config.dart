@@ -1,6 +1,6 @@
 import '../../models/editing_tool.dart';
 
-class TFEditorConfig {
+class TfEditorConfig {
 
   static const minScale = 1e-6;
   static const maxScale = 1e6;

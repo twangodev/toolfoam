@@ -39,9 +39,9 @@ class TFCollection extends Entity {
     return await _buildDirectoryFromCollection(OrganizationStructureData.tools);
   }
 
-  Future<List<TFTool>> listTools() async {
+  Future<List<TfTool>> listTools() async {
     List<File> files = await StorageFileSystemUtil.list<File>(await getToolsDirectory());
-    return TFTool.fromFiles(files, this);
+    return TfTool.fromFiles(files, this);
   }
 
   Future<Directory> getLayoutsDirectory() async {

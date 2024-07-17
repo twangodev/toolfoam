@@ -6,16 +6,16 @@ import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import '../../models/tools/tf_tool_data.dart';
 
-class TFEditorPainter extends CustomPainter {
+class TfEditorPainter extends CustomPainter {
 
   final Quad viewport;
   final bool toggleGrid;
-  final TFEditorData data;
+  final TfEditorData data;
   final EditingTool editingTool;
 
   static const Offset origin = Offset(0, 0);
 
-  TFEditorPainter({
+  TfEditorPainter({
     required this.viewport,
     required this.data,
     required this.toggleGrid,
@@ -32,7 +32,7 @@ class TFEditorPainter extends CustomPainter {
   late final Offset? activePointer = data.activePointer;
   late final Offset? nearestGridSnap = data.nearestGridSnap;
   late final bool? shouldSnapToGrid = data.shouldSnapToGrid;
-  late final TFToolData? toolData = data.toolData;
+  late final TfToolData? toolData = data.toolData;
 
   late final scaledVisibleRect = Rect.fromLTRB(
       (visibleRect.left / gridSize).floorToDouble(),
@@ -64,25 +64,25 @@ class TFEditorPainter extends CustomPainter {
 
     Path topLeft = Path()
       ..moveTo(0, 0)
-      ..lineTo(-TFEditorConfig.ucsInnerRadius * scaleInverse, 0)
+      ..lineTo(-TfEditorConfig.ucsInnerRadius * scaleInverse, 0)
       ..arcToPoint(
-        Offset(0, -TFEditorConfig.ucsInnerRadius * scaleInverse),
-        radius: Radius.circular(TFEditorConfig.ucsInnerRadius * scaleInverse),
+        Offset(0, -TfEditorConfig.ucsInnerRadius * scaleInverse),
+        radius: Radius.circular(TfEditorConfig.ucsInnerRadius * scaleInverse),
         clockwise: true,
       )
       ..close();
 
     Path bottomRight = Path()
       ..moveTo(0, 0)
-      ..lineTo(TFEditorConfig.ucsInnerRadius * scaleInverse, 0)
+      ..lineTo(TfEditorConfig.ucsInnerRadius * scaleInverse, 0)
       ..arcToPoint(
-        Offset(0, TFEditorConfig.ucsInnerRadius * scaleInverse),
-        radius: Radius.circular(TFEditorConfig.ucsInnerRadius * scaleInverse),
+        Offset(0, TfEditorConfig.ucsInnerRadius * scaleInverse),
+        radius: Radius.circular(TfEditorConfig.ucsInnerRadius * scaleInverse),
         clockwise: true,
       )
       ..close();
 
-    canvas.drawCircle(origin, TFEditorConfig.ucsRadius * scaleInverse, grayUcsBackground);
+    canvas.drawCircle(origin, TfEditorConfig.ucsRadius * scaleInverse, grayUcsBackground);
     canvas.drawPath(topLeft, grayUcsForeground);
     canvas.drawPath(bottomRight, grayUcsForeground);
 
@@ -109,7 +109,7 @@ class TFEditorPainter extends CustomPainter {
     for (int i = scaledVisibleRect.top.toInt(); i <= scaledVisibleRect.bottom.toInt(); i++) {
       double y = i * gridSize;
       if (y == 0) continue;
-      Paint selectedPaint = (i % TFEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
+      Paint selectedPaint = (i % TfEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
       canvas.drawLine(Offset(visibleRect.left, y), Offset(visibleRect.right, y), selectedPaint);
     }
 
@@ -117,7 +117,7 @@ class TFEditorPainter extends CustomPainter {
     for (int i = scaledVisibleRect.left.toInt(); i <= scaledVisibleRect.right.toInt(); i++) {
       double x = i * gridSize;
       if (x == 0) continue;
-      Paint selectedPaint = (i % TFEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
+      Paint selectedPaint = (i % TfEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
       canvas.drawLine(Offset(x, visibleRect.top), Offset(x, visibleRect.bottom), selectedPaint);
     }
 
@@ -129,7 +129,7 @@ class TFEditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double halfSize = TFEditorConfig.crossMarkerSize * scaleInverse / 2;
+    double halfSize = TfEditorConfig.crossMarkerSize * scaleInverse / 2;
 
     canvas.drawLine(offset.translate(-halfSize, 0), offset.translate(halfSize, 0), crosshairPaint);
     canvas.drawLine(offset.translate(0, -halfSize), offset.translate(0, halfSize), crosshairPaint);
@@ -142,7 +142,7 @@ class TFEditorPainter extends CustomPainter {
       ..strokeWidth = 1.5 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double scaledSize = TFEditorConfig.defaultSnapTolerance * scaleInverse;
+    double scaledSize = TfEditorConfig.defaultSnapTolerance * scaleInverse;
     Rect rect = Rect.fromCenter(center: offset, width: scaledSize, height: scaledSize);
 
     canvas.drawRect(rect, snapPaint);
@@ -183,8 +183,8 @@ class TFEditorPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     for (Offset point in toolData!.points) {
-      canvas.drawCircle(point, TFEditorConfig.pointRadius * scaleInverse, fillPaint);
-      canvas.drawCircle(point, TFEditorConfig.pointRadius * scaleInverse, strokePaint);
+      canvas.drawCircle(point, TfEditorConfig.pointRadius * scaleInverse, fillPaint);
+      canvas.drawCircle(point, TfEditorConfig.pointRadius * scaleInverse, strokePaint);
     }
   }
 

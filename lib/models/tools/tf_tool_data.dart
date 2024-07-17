@@ -4,13 +4,13 @@ import 'dart:ui';
 import '../json_serializable.dart';
 
 
-class TFToolData implements JsonSerializable {
+class TfToolData implements JsonSerializable {
 
   HashSet<Offset> points = HashSet<Offset>();
 
-  TFToolData();
+  TfToolData();
 
-  TFToolData.fromJson(Map<String, dynamic> json) {
+  TfToolData.fromJson(Map<String, dynamic> json) {
     List<dynamic> rawPoints = json['points'];
     points = HashSet<Offset>.from(rawPoints.map((rawPoint) => Offset(rawPoint[0], rawPoint[1])));
   }
