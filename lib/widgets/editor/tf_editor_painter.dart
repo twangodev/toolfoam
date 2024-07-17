@@ -1,10 +1,6 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_logic.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 

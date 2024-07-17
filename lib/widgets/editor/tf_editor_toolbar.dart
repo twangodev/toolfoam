@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/buttons/toolbar_button.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';

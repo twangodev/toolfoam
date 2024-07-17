@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:material_symbols_icons/symbols.dart';
-import 'package:relative_time/relative_time.dart';
 import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.dart';
 
 import '../../models/entity.dart';

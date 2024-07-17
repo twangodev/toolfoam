@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:toolfoam/pages/layouts_page.dart';
 import 'package:toolfoam/pages/tools_page.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';

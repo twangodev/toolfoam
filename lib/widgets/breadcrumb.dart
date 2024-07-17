@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:toolfoam/widgets/text/renameable_title.dart';
 
 class Breadcrumb extends StatelessWidget {

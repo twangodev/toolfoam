@@ -5,8 +5,8 @@ import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_interactive_viewer.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_toolbar.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../../models/editing_tool.dart';
 
