@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_tool_data.dart';
 import 'package:toolfoam/models/tools/tf_tool_metadata.dart';
+import 'package:path/path.dart' as p;
 
 import '../../data/organization_structure_data.dart';
 import '../../utilities/storage_file_system_util.dart';
@@ -11,6 +13,8 @@ import '../json_serializable.dart';
 import '../tf_collection.dart';
 
 class TfTool extends DiskIOEntity implements JsonSerializable {
+
+  static final Logger logger = Logger('TfTool');
 
   TfToolMetadata metadata = TfToolMetadata.empty();
   TfCollection owner;
@@ -24,7 +28,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   static Future<TfTool> fromFile(File file, TfCollection owner) async {
     String rawJson = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> json = jsonDecode(rawJson);
-    return TfTool.fromJson(json, file.path, owner);
+    return TfTool.fromJson(json, p.basenameWithoutExtension(file.path), owner);
   }
 
   static Future<List<TfTool>> fromFiles(List<File> files, TfCollection owner) async {
@@ -71,6 +75,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     File file = await _getFile();
     String json = jsonEncode(toJson());
     await StorageFileSystemUtil.writeToFile(file, json);
+    await owner.lastChangedNow();
   }
 
   @override

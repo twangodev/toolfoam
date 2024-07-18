@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:toolfoam/pages/tool_editor_page.dart';
 import 'package:toolfoam/widgets/containers/required_active_collection_container.dart';
 import 'package:toolfoam/widgets/item_card.dart';
@@ -26,9 +27,14 @@ class ToolsPage extends StatefulWidget {
 
 class _ToolsPageState extends State<ToolsPage> {
 
+  static final Logger logger = Logger('ToolsPage');
+
+  final GlobalKey _gridKey = GlobalKey();
+
   List<TfTool> tools = [];
 
-  void refreshTools() async {
+  Future<void> refreshTools() async {
+    logger.fine('Refreshing tools');
     List<TfTool>? updatedTools = await widget.selectedCollection?.listTools();
 
     setState(() {
@@ -36,26 +42,31 @@ class _ToolsPageState extends State<ToolsPage> {
     });
   }
 
-  void onAddTool() {
+  void onAddTool() async {
     TfTool(uuid: Entity.uuidGenerator.v4(), owner: widget.selectedCollection!).create('New Tool');
-    refreshTools();
+    await refreshTools();
   }
 
   void onTap(BuildContext context, TfTool tool) async {
+    logger.info('Opening tool ${tool.uuid} (${tool.metadata.name})');
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ToolEditorPage(tool: tool))
     );
+    logger.info('Tool ${tool.uuid} (${tool.metadata.name}) closed');
+    await refreshTools();
   }
 
-  void renameTool(BuildContext context, TfTool tool, String name) {
+  void renameTool(TfTool tool, String name) async {
+    logger.fine('Renaming tool ${tool.uuid} to $name');
     tool.rename(name);
-    tool.push();
+    await tool.push();
   }
 
-  void onDelete(TfTool tool) {
+  void onDelete(TfTool tool) async {
+    logger.fine('Deleting tool ${tool.uuid} (${tool.metadata.name})');
     tool.delete();
-    refreshTools();
+    await refreshTools();
   }
 
   void onDetails(BuildContext context, TfTool tool) {
@@ -73,13 +84,16 @@ class _ToolsPageState extends State<ToolsPage> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.selectedCollection != oldWidget.selectedCollection) {
+      logger.fine('Selected collection changed, refreshing tools');
       refreshTools();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return RequiredActiveCollectionContainerWidget(
       selectedCollection: widget.selectedCollection,
       onCollectionSelected: widget.onCollectionSelected,
@@ -94,7 +108,7 @@ class _ToolsPageState extends State<ToolsPage> {
                 title: 'Tools',
                 addItemTooltip: 'Add a new tool',
                 onAddFolder: () {
-                  throw UnimplementedError();
+                  throw UnimplementedError(); // TODO
                 },
                 onAddItem: onAddTool,
               ),
@@ -108,23 +122,30 @@ class _ToolsPageState extends State<ToolsPage> {
                       itemCount: tools.length,
                       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 500,
-                        childAspectRatio: 16/9,
+                        childAspectRatio: 16 / 9,
                       ),
                       itemBuilder: (BuildContext context, int index) {
                         TfTool tool = tools[index];
                         return ItemCard(
+                          key: ObjectKey(tool),
                           name: tool.metadata.name ?? 'Unnamed Tool',
                           preview: null,
                           onTap: () { onTap(context, tool); },
-                          onRename: (String name) { renameTool(context, tool, name); },
-                          onDetails: () { onDetails(context, tool); },
-                          onDelete: () { onDelete(tool); },
+                          onRename: (String name) {
+                            renameTool(tool, name);
+                          },
+                          onDetails: () {
+                            onDetails(context, tool);
+                          },
+                          onDelete: () {
+                            onDelete(tool);
+                          },
                         );
                       },
                     )
                   ]
-                ),
-              )
+                )
+            )
             ]
           ),
         )

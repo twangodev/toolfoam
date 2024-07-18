@@ -1,10 +1,24 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logging/logging.dart';
 import 'package:relative_time/relative_time.dart';
 import 'package:toolfoam/pages/home_page.dart';
 
 void main() async {
+
+  Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+  Logger.root.onRecord.listen((record) {
+    if (kDebugMode) {
+      String name = record.loggerName;
+      if (name.isEmpty) name = 'root';
+      print('[${record.level.name}] $name-${record.time}: ${record.message}');
+    }
+  });
+
+  Logger.root.info('Starting Toolfoam');
+
   runApp(const Toolfoam());
 }
 
