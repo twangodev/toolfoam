@@ -103,6 +103,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
                 itemBuilder: (context, index) {
                   TfCollection collection = collections[index];
                   return CollectionCard(
+                    key: ObjectKey(collection),
                     collection: collection,
                     shouldNullifySelectedUponDelete: () => widget.selectedCollection() == collection,
                     onCollectionSelected: (TfCollection? collection) {

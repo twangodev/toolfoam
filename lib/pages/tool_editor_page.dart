@@ -24,6 +24,7 @@ class _ToolEditorPageState extends State<ToolEditorPage> {
     });
 
     widget.tool.rename(newName);
+    widget.tool.push();
   }
 
   @override
