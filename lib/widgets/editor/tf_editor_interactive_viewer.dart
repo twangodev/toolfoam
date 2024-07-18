@@ -66,7 +66,7 @@ class TfEditorInteractiveViewer extends StatefulWidget {
     this.ignoreIllegalMousePan = false,
     required Widget this.child,
   }) : assert(minScale > 0),
-        assert(interactionEndFrictionCoefficient > 0),
+        assert(interactionEndFrictionCoefficient >= 0),
         assert(minScale.isFinite),
         assert(maxScale > 0),
         assert(!maxScale.isNaN),
@@ -111,7 +111,7 @@ class TfEditorInteractiveViewer extends StatefulWidget {
     this.ignoreIllegalMousePan = false,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(minScale > 0),
-        assert(interactionEndFrictionCoefficient > 0),
+        assert(interactionEndFrictionCoefficient >= 0),
         assert(minScale.isFinite),
         assert(maxScale > 0),
         assert(!maxScale.isNaN),
@@ -890,6 +890,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
           return;
         }
 
+
+
         final Vector3 translationVector = _transformationController!.value.getTranslation();
         final Offset translation = Offset(translationVector.x, translationVector.y);
         final FrictionSimulation frictionSimulationX = FrictionSimulation(
@@ -1387,21 +1389,4 @@ Axis? _getPanAxis(Offset point1, Offset point2) {
   final double x = point2.dx - point1.dx;
   final double y = point2.dy - point1.dy;
   return x.abs() > y.abs() ? Axis.horizontal : Axis.vertical;
-}
-
-/// This enum is used to specify the behavior of the [TfEditorInteractiveViewer] when
-/// the user drags the viewport.
-enum PanAxis{
-  /// The user can only pan the viewport along the horizontal axis.
-  horizontal,
-
-  /// The user can only pan the viewport along the vertical axis.
-  vertical,
-
-  /// The user can pan the viewport along the horizontal and vertical axes
-  /// but not diagonally.
-  aligned,
-
-  /// The user can pan the viewport freely in any direction.
-  free,
 }
