@@ -1,14 +1,15 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:toolfoam/models/tools/tf_tool_data.dart';
+import 'package:toolfoam/models/tools/tf_path_data.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_logic.dart';
 
 class TfEditorData extends ChangeNotifier {
 
   TfEditorData({
-    this.data,
+    required this.toolData,
   });
 
   double _scale = 1.0;
@@ -34,36 +35,44 @@ class TfEditorData extends ChangeNotifier {
     notifyListeners();
   }
 
-  Offset? get nearestGridSnap {
-    if (activePointer == null) return null;
+  Offset gridSnap(Offset offset) {
     return Offset(
-      (activePointer!.dx / gridSize).round() * gridSize,
-      (activePointer!.dy / gridSize).round() * gridSize,
+      (offset.dx / gridSize).round() * gridSize,
+      (offset.dy / gridSize).round() * gridSize,
     );
   }
 
-  bool? get shouldSnapToGrid  {
+  Offset? get activePointerGridSnap {
     if (activePointer == null) return null;
-    return TfEditorLogic.interceptsSquare(nearestGridSnap!, activePointer!, TfEditorConfig.defaultSnapTolerance * scaleInverse);
+    return gridSnap(activePointer!);
   }
 
+  bool shouldSnapToGrid(Offset offset) {
+    Offset snapped = gridSnap(offset);
+    double snapTolerance = TfEditorConfig.defaultSnapTolerance;
+    if (snapped == Offset.zero) snapTolerance = TfEditorConfig.ucsRadius * 2;
+    return TfEditorLogic.interceptsSquare(gridSnap(offset), offset, snapTolerance * scaleInverse);
+  }
 
-  Offset? get effectivePointerCoordinates {
+  bool? get activeShouldSnapToGrid  {
     if (activePointer == null) return null;
+    return shouldSnapToGrid(activePointer!);
+  }
 
-    if (shouldSnapToGrid!) {
-      return nearestGridSnap;
+  Offset effectivePointerCoordinates(Offset offset) {
+    if (shouldSnapToGrid(offset)) {
+      return gridSnap(offset);
     }
 
-    return activePointer;
+    return offset;
   }
 
-  TfToolData? data;
-  TfToolData? get toolData => data;
-  set toolData(TfToolData? value) {
-    if (value == data) return;
-    data = value;
-    notifyListeners();
+  Offset? get activeEffectivePointer {
+    if (activePointer == null) return null;
+    return effectivePointerCoordinates(activePointer!);
   }
+
+  TfToolData toolData;
+  Queue<String> actionPointQueue = Queue();
 
 }

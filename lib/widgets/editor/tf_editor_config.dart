@@ -10,7 +10,7 @@ class TfEditorConfig {
 
   // User Experience
 
-  static const defaultSnapTolerance = 12.5;
+  static const defaultSnapTolerance = 8.0;
 
   // Painter Configuration
 

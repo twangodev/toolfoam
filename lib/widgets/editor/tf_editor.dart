@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_tool.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_interactive_viewer.dart';
@@ -9,6 +10,8 @@ import 'package:toolfoam/widgets/editor/tf_editor_toolbar.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../models/editing_tool.dart';
+import '../../models/line.dart';
+import '../../models/tools/tf_path_data.dart';
 
 class TfEditor extends StatefulWidget {
 
@@ -23,9 +26,11 @@ class TfEditor extends StatefulWidget {
 
 class _TfEditorState extends State<TfEditor> {
 
+  static final logger = Logger('TFEditorState');
+
   final TransformationController transformationController = TransformationController();
 
-  late final TfEditorData notifier = TfEditorData(data: widget.tool.data);
+  late final TfEditorData notifier = TfEditorData(toolData: widget.tool.data);
 
   Size viewerSize = Size.zero;
   bool allowPrimaryMouseButtonPan = false;
@@ -33,6 +38,7 @@ class _TfEditorState extends State<TfEditor> {
 
   bool gridToggleState = false;
   EditingTool activeEditingTool = TfEditorConfig.defaultTool;
+  List<String> actionPointBuffer = [];
 
   void toggleGrid(bool newState) {
     setState(() {
@@ -41,6 +47,7 @@ class _TfEditorState extends State<TfEditor> {
   }
 
   void setTool(EditingTool tool) {
+    notifier.actionPointQueue.clear();
     setState(() {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
@@ -48,7 +55,28 @@ class _TfEditorState extends State<TfEditor> {
   }
 
   void onPointerDown(PointerDownEvent event) {
+    logger.finer('Pointer down event: $event');
+    if (activeEditingTool == EditingTool.pan) return;
+    Offset scenePointer = transformationController.toScene(event.localPosition);
+    Offset effectivePointer = notifier.effectivePointerCoordinates(scenePointer);
 
+    if (activeEditingTool == EditingTool.line) {
+      TfToolData toolData = notifier.toolData;
+      String pointUuid = toolData.addPoint(effectivePointer);
+      notifier.actionPointQueue.add(pointUuid);
+
+      if (notifier.actionPointQueue.length == 2) {
+        logger.fine('Creating line between points: ${notifier.actionPointQueue}');
+        String startUuid = notifier.actionPointQueue.removeFirst();
+        String endUuid = notifier.actionPointQueue.first;
+
+        Line line = Line(startUuid, endUuid);
+        toolData.lines.add(line);
+        logger.finest('All lines: ${toolData.lines}');
+      }
+
+      return;
+    }
   }
 
   void updatePointer(PointerEvent event) {
@@ -92,6 +120,9 @@ class _TfEditorState extends State<TfEditor> {
                     onPointerDown: onPointerDown,
                     onPointerMove: updatePointer,
                     onPointerHover: updatePointer,
+                    onPointerPanZoomStart: updatePointer,
+                    onPointerPanZoomUpdate: updatePointer,
+                    onPointerPanZoomEnd: updatePointer,
                     child: MouseRegion(
                       onExit: (PointerExitEvent event) {
                         notifier.activePointer = null;
@@ -112,7 +143,7 @@ class _TfEditorState extends State<TfEditor> {
                               return CustomPaint(
                                 painter: TfEditorPainter(
                                   viewport: viewport,
-                                  data: notifier,
+                                  editorData: notifier,
                                   toggleGrid: gridToggleState,
                                   editingTool: activeEditingTool,
                                 ),

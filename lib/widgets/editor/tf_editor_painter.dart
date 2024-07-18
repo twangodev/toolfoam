@@ -4,35 +4,38 @@ import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
-import '../../models/tools/tf_tool_data.dart';
+import '../../models/line.dart';
+import '../../models/tools/tf_path_data.dart';
 
 class TfEditorPainter extends CustomPainter {
 
   final Quad viewport;
   final bool toggleGrid;
-  final TfEditorData data;
+  final TfEditorData editorData;
   final EditingTool editingTool;
 
   static const Offset origin = Offset(0, 0);
 
   TfEditorPainter({
     required this.viewport,
-    required this.data,
+    required this.editorData,
     required this.toggleGrid,
     required this.editingTool,
   });
 
   late final visibleRect = Rect.fromLTRB(viewport.point0.x, viewport.point0.y, viewport.point2.x, viewport.point2.y,);
   
-  late final double scale = data.scale;
-  late final double scaleInverse = data.scaleInverse;
-  late final double effectiveGridSize = data.effectiveGridSize;
-  late final int gridRatio = data.gridRatio;
-  late final double gridSize = data.gridSize;
-  late final Offset? activePointer = data.activePointer;
-  late final Offset? nearestGridSnap = data.nearestGridSnap;
-  late final bool? shouldSnapToGrid = data.shouldSnapToGrid;
-  late final TfToolData? toolData = data.toolData;
+  late final double scale = editorData.scale;
+  late final double scaleInverse = editorData.scaleInverse;
+  late final double effectiveGridSize = editorData.effectiveGridSize;
+  late final int gridRatio = editorData.gridRatio;
+  late final double gridSize = editorData.gridSize;
+  late final Offset? activePointer = editorData.activePointer;
+  late final Offset? activePointerGridSnap = editorData.activePointerGridSnap;
+  late final Offset? activeEffectivePointer = editorData.activeEffectivePointer;
+  late final bool? activeShouldSnapToGrid = editorData.activeShouldSnapToGrid;
+  late final TfToolData toolData = editorData.toolData;
+  late final actionPointQueue = editorData.actionPointQueue;
 
   late final scaledVisibleRect = Rect.fromLTRB(
       (visibleRect.left / gridSize).floorToDouble(),
@@ -142,16 +145,18 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 1.5 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double scaledSize = TfEditorConfig.defaultSnapTolerance * scaleInverse;
+    double defaultSize = TfEditorConfig.defaultSnapTolerance * 2;
+    if (offset == origin) defaultSize = TfEditorConfig.ucsRadius * 2;
+    double scaledSize = defaultSize * scaleInverse;
     Rect rect = Rect.fromCenter(center: offset, width: scaledSize, height: scaledSize);
 
     canvas.drawRect(rect, snapPaint);
   }
 
   void establishGridSnap(Canvas canvas) {
-    if (shouldSnapToGrid!) {
-      drawSnapMarker(canvas, nearestGridSnap!);
-      drawCrossMarker(canvas, nearestGridSnap!);
+    if (activeShouldSnapToGrid!) {
+      drawSnapMarker(canvas, activePointerGridSnap!);
+      drawCrossMarker(canvas, activePointerGridSnap!);
     } else {
       drawCrossMarker(canvas, activePointer!);
     }
@@ -159,8 +164,8 @@ class TfEditorPainter extends CustomPainter {
 
   void establishMarker(Canvas canvas) {
   if (!editingTool.allowsMarker || activePointer == null) return;
-    if (toolData != null && toolData!.points.contains(nearestGridSnap!)) {
-      drawSnapMarker(canvas, nearestGridSnap!);
+    if (toolData.points.values.contains(activePointerGridSnap!)) {
+      drawSnapMarker(canvas, activePointerGridSnap!);
       return;
     }
 
@@ -168,10 +173,6 @@ class TfEditorPainter extends CustomPainter {
   }
 
   void drawPoints(Canvas canvas) {
-    if (toolData == null) {
-      return;
-    }
-
     final Paint fillPaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse
@@ -182,21 +183,49 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    for (Offset point in toolData!.points) {
+    for (Offset point in toolData!.points.values) {
       canvas.drawCircle(point, TfEditorConfig.pointRadius * scaleInverse, fillPaint);
       canvas.drawCircle(point, TfEditorConfig.pointRadius * scaleInverse, strokePaint);
     }
   }
 
+  void drawLines(Canvas canvas) {
+    final Paint linePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2 * scaleInverse;
+
+    for (Line line in toolData.lines) {
+      Offset start = toolData.points[line.point1]!;
+      Offset end = toolData.points[line.point2]!;
+      canvas.drawLine(start, end, linePaint);
+    }
+  }
+
+  void drawEditToolPreview(Canvas canvas) {
+    if (activePointer == null) return;
+
+    if (editingTool == EditingTool.line) {
+      if (actionPointQueue.isEmpty) return;
+
+      final Paint linePaint = Paint()
+        ..color = Colors.white
+        ..strokeWidth = 2 * scaleInverse;
+
+      String lastPointUuid = actionPointQueue.last;
+      Offset lastPoint = toolData.points[lastPointUuid]!;
+      canvas.drawLine(lastPoint, activeEffectivePointer!, linePaint);
+    }
+  }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size) { // TODO get rid of all the null assertions by passing in the null-asserted values rather than using attributes
     establishGrid(canvas);
     establishCenterMarkings(canvas);
 
-    toolData!.points.add(Offset(100, 100));
     drawPoints(canvas);
+    drawLines(canvas);
 
+    drawEditToolPreview(canvas);
     establishMarker(canvas);
   }
 
