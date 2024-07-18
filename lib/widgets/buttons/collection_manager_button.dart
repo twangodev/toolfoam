@@ -5,8 +5,8 @@ import '../dialogs/collection_manager_dialog.dart';
 
 class CollectionManagerButton extends StatelessWidget {
 
-  final TFCollection? selectedCollection;
-  final Function(TFCollection?) onCollectionSelected;
+  final TfCollection? selectedCollection;
+  final Function(TfCollection?) onCollectionSelected;
 
   const CollectionManagerButton({super.key, required this.selectedCollection, required this.onCollectionSelected});
 

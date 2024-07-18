@@ -5,8 +5,8 @@ import '../models/tf_collection.dart';
 
 class LayoutsPage extends StatefulWidget {
 
-  final TFCollection? selectedCollection;
-  final Function(TFCollection?) onCollectionSelected;
+  final TfCollection? selectedCollection;
+  final Function(TfCollection?) onCollectionSelected;
 
   const LayoutsPage({super.key, required this.selectedCollection, required this.onCollectionSelected});
 

@@ -9,8 +9,8 @@ import '../../models/tf_collection.dart';
 class CollectionManagerDialog extends StatefulWidget {
 
   const CollectionManagerDialog({super.key, required this.selectedCollection, required this.onCollectionSelected});
-  final TFCollection? Function() selectedCollection;
-  final ValueChanged<TFCollection?> onCollectionSelected;
+  final TfCollection? Function() selectedCollection;
+  final ValueChanged<TfCollection?> onCollectionSelected;
 
   @override
   State<CollectionManagerDialog> createState() => _CollectionManagerDialogState();
@@ -21,14 +21,14 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
 
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
-  List<TFCollection> collections = [];
+  List<TfCollection> collections = [];
 
   void _dismiss() {
     Navigator.of(context, rootNavigator: true).pop(context);
   }
 
   void _createCollection() async {
-    TFCollection tfc = TFCollection(uuid: Entity.uuidGenerator.v4());
+    TfCollection tfc = TfCollection(uuid: Entity.uuidGenerator.v4());
     await tfc.create(_searchController.text);
 
     _searchController.clear();
@@ -37,7 +37,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
   }
 
   void _refreshCollections() async {
-    List<TFCollection> updatedCollections = await TFCollection.list();
+    List<TfCollection> updatedCollections = await TfCollection.list();
     setState(() {
       collections = updatedCollections;
     });
@@ -55,7 +55,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
     MediaQueryData mediaQuery = MediaQuery.of(context);
     return Dialog(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 600),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -97,15 +97,15 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
                 prototypeItem: CollectionCard(
                     collection: null,
                     shouldNullifySelectedUponDelete: () => false,
-                    onCollectionSelected: (TFCollection? collection) {},
+                    onCollectionSelected: (TfCollection? collection) {},
                     onDelete: () {}
                 ),
                 itemBuilder: (context, index) {
-                  TFCollection collection = collections[index];
+                  TfCollection collection = collections[index];
                   return CollectionCard(
                     collection: collection,
                     shouldNullifySelectedUponDelete: () => widget.selectedCollection() == collection,
-                    onCollectionSelected: (TFCollection? collection) {
+                    onCollectionSelected: (TfCollection? collection) {
                       widget.onCollectionSelected(collection);
                       _dismiss();
                     },
@@ -129,9 +129,9 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
 
 class CollectionCard extends StatefulWidget {
 
-  final TFCollection? collection;
+  final TfCollection? collection;
   final bool Function() shouldNullifySelectedUponDelete;
-  final Function(TFCollection?) onCollectionSelected;
+  final Function(TfCollection?) onCollectionSelected;
   final Function() onDelete;
 
   const CollectionCard({

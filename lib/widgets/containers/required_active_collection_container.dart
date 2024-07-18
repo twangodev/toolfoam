@@ -5,8 +5,8 @@ import '../../models/tf_collection.dart';
 
 class RequiredActiveCollectionContainerWidget extends StatelessWidget {
 
-  final TFCollection? selectedCollection;
-  final Function(TFCollection?) onCollectionSelected;
+  final TfCollection? selectedCollection;
+  final Function(TfCollection?) onCollectionSelected;
   final Widget child;
 
   const RequiredActiveCollectionContainerWidget({super.key, required this.selectedCollection, required this.onCollectionSelected, required this.child});

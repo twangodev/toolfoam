@@ -23,10 +23,10 @@ class _HomePageState extends State<HomePage> {
 
   String? name;
   int? selectedPage = 0;
-  TFCollection? selectedCollection;
+  TfCollection? selectedCollection;
   List<BreadcrumbItem> breadcrumbItems = [];
 
-  _onCollectionSelected(TFCollection? collection) {
+  _onCollectionSelected(TfCollection? collection) {
     setState(() {
       selectedCollection = collection;
     });

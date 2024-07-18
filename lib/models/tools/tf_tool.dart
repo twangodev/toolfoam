@@ -13,7 +13,7 @@ import '../tf_collection.dart';
 class TfTool extends DiskIOEntity implements JsonSerializable {
 
   TfToolMetadata metadata = TfToolMetadata.empty();
-  TFCollection owner;
+  TfCollection owner;
   TfToolData data = TfToolData();
 
   TfTool({required super.uuid, required this.owner});
@@ -21,13 +21,13 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   TfTool.fromJson(Map<String, dynamic> json, String uuid, this.owner):
     metadata = TfToolMetadata.fromJson(json['metadata']), super(uuid: uuid);
 
-  static Future<TfTool> fromFile(File file, TFCollection owner) async {
+  static Future<TfTool> fromFile(File file, TfCollection owner) async {
     String rawJson = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> json = jsonDecode(rawJson);
     return TfTool.fromJson(json, file.path, owner);
   }
 
-  static Future<List<TfTool>> fromFiles(List<File> files, TFCollection owner) async {
+  static Future<List<TfTool>> fromFiles(List<File> files, TfCollection owner) async {
     List<Future<TfTool>> futures = files.map((file) => fromFile(file, owner)).toList();
     return await Future.wait(futures);
   }

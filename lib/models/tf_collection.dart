@@ -9,9 +9,9 @@ import '../utilities/storage_file_system_util.dart';
 import 'entity.dart';
 import 'metadata.dart';
 
-class TFCollection extends Entity {
+class TfCollection extends Entity {
 
-  TFCollection({required super.uuid});
+  TfCollection({required super.uuid});
 
   static Future<Directory> _getCollectionsDirectory() async {
     return StorageFileSystemUtil.buildDirectory(await StorageFileSystemUtil.getStorage(), OrganizationStructureData.collections);
@@ -25,14 +25,14 @@ class TFCollection extends Entity {
     return StorageFileSystemUtil.buildDirectory(await _getCollection(), path);
   }
 
-  static Future<List<TFCollection>> list() async {
+  static Future<List<TfCollection>> list() async {
     Directory collectionsDirectory = await _getCollectionsDirectory();
     if (!await collectionsDirectory.exists()) {
       await collectionsDirectory.create();
       return [];
     }
     List<Directory> collections = await StorageFileSystemUtil.list<Directory>(collectionsDirectory);
-    return collections.map((dir) => TFCollection(uuid: p.basename(dir.path))).toList();
+    return collections.map((dir) => TfCollection(uuid: p.basenameWithoutExtension(dir.path))).toList();
   }
 
   Future<Directory> getToolsDirectory() async {
@@ -85,6 +85,7 @@ class TFCollection extends Entity {
     Metadata metadata = await getMetadata();
     metadata.name = newName;
     await writeMetadata(metadata);
+    await lastChangedNow();
   }
 
   Future<Metadata> getMetadata() async {
@@ -107,7 +108,7 @@ class TFCollection extends Entity {
     await StorageFileSystemUtil.writeToFile(metadataFile, jsonEncode(metadata));
   }
 
-  Future syncTimestamp(String lastChangedDescriptor) async {
+  Future lastChangedNow() async {
     Metadata metadata = await getMetadata();
     metadata.lastModified = DateTime.now();
     await writeMetadata(metadata);
@@ -115,7 +116,7 @@ class TFCollection extends Entity {
 
   @override
   bool operator == (Object other) {
-    if (other is TFCollection) {
+    if (other is TfCollection) {
       return uuid == other.uuid;
     } else {
       return false;

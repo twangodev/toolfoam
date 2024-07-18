@@ -14,8 +14,8 @@ class ToolsPage extends StatefulWidget {
 
   final List<BreadcrumbItem> breadcrumbItems;
 
-  final TFCollection? selectedCollection;
-  final Function(TFCollection?) onCollectionSelected;
+  final TfCollection? selectedCollection;
+  final Function(TfCollection?) onCollectionSelected;
 
   const ToolsPage({super.key, required this.selectedCollection, required this.onCollectionSelected, required this.breadcrumbItems});
 
