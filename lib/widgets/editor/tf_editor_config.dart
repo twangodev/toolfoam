@@ -10,7 +10,10 @@ class TfEditorConfig {
 
   // User Experience
 
-  static const defaultSnapTolerance = 8.0;
+  static const defaultSnapTolerance = 16.0;
+
+  static const confirmationMarkerSize = 10.0;
+  static const confirmationMarkerDistance = 50.0;
 
   // Painter Configuration
 

@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'dart:collection' show LinkedList, Queue;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -51,7 +51,7 @@ class TfEditorData extends ChangeNotifier {
     Offset snapped = gridSnap(offset);
     double snapTolerance = TfEditorConfig.defaultSnapTolerance;
     if (snapped == Offset.zero) snapTolerance = TfEditorConfig.ucsRadius * 2;
-    return TfEditorLogic.interceptsSquare(gridSnap(offset), offset, snapTolerance * scaleInverse);
+    return TfEditorLogic.interceptsSquare(snapped, offset, snapTolerance * scaleInverse);
   }
 
   bool? get activeShouldSnapToGrid  {
@@ -73,6 +73,6 @@ class TfEditorData extends ChangeNotifier {
   }
 
   TfToolData toolData;
-  Queue<String> actionPointQueue = Queue();
+  List<String> actionPointerStack = [];
 
 }

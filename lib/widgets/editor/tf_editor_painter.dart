@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:toolfoam/extensions/list_extensions.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad;
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector2;
 
 import '../../models/line.dart';
 import '../../models/tools/tf_path_data.dart';
@@ -35,7 +36,7 @@ class TfEditorPainter extends CustomPainter {
   late final Offset? activeEffectivePointer = editorData.activeEffectivePointer;
   late final bool? activeShouldSnapToGrid = editorData.activeShouldSnapToGrid;
   late final TfToolData toolData = editorData.toolData;
-  late final actionPointQueue = editorData.actionPointQueue;
+  late final actionPointQueue = editorData.actionPointerStack;
 
   late final scaledVisibleRect = Rect.fromLTRB(
       (visibleRect.left / gridSize).floorToDouble(),
@@ -127,15 +128,15 @@ class TfEditorPainter extends CustomPainter {
   }
 
   void drawCrossMarker(Canvas canvas, Offset offset) {
-    final Paint crosshairPaint = Paint()
+    final Paint crossPaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
     double halfSize = TfEditorConfig.crossMarkerSize * scaleInverse / 2;
 
-    canvas.drawLine(offset.translate(-halfSize, 0), offset.translate(halfSize, 0), crosshairPaint);
-    canvas.drawLine(offset.translate(0, -halfSize), offset.translate(0, halfSize), crosshairPaint);
+    canvas.drawLine(offset.translate(-halfSize, 0), offset.translate(halfSize, 0), crossPaint);
+    canvas.drawLine(offset.translate(0, -halfSize), offset.translate(0, halfSize), crossPaint);
 
   }
 
@@ -145,7 +146,7 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 1.5 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double defaultSize = TfEditorConfig.defaultSnapTolerance * 2;
+    double defaultSize = TfEditorConfig.defaultSnapTolerance;
     if (offset == origin) defaultSize = TfEditorConfig.ucsRadius * 2;
     double scaledSize = defaultSize * scaleInverse;
     Rect rect = Rect.fromCenter(center: offset, width: scaledSize, height: scaledSize);
@@ -164,7 +165,7 @@ class TfEditorPainter extends CustomPainter {
 
   void establishMarker(Canvas canvas) {
   if (!editingTool.allowsMarker || activePointer == null) return;
-    if (toolData.points.values.contains(activePointerGridSnap!)) {
+    if (toolData.points.values.contains(activeEffectivePointer!)) {
       drawSnapMarker(canvas, activePointerGridSnap!);
       return;
     }
@@ -201,6 +202,21 @@ class TfEditorPainter extends CustomPainter {
     }
   }
 
+  void drawConfirmationMarker(Canvas canvas, Offset offset, Offset direction) {
+
+    // TODO make confirmation change based on hover and implement click
+
+    final Paint confirmationPaint = Paint()
+      ..color = Colors.green
+      ..strokeWidth = 2 * scaleInverse
+      ..style = PaintingStyle.stroke;
+
+    Offset perpendicular = Offset(-direction.dy, direction.dx);
+    Offset center = offset + perpendicular * TfEditorConfig.confirmationMarkerDistance * scaleInverse;
+    canvas.drawCircle(center, TfEditorConfig.confirmationMarkerSize * scaleInverse, confirmationPaint);
+
+  }
+
   void drawEditToolPreview(Canvas canvas) {
     if (activePointer == null) return;
 
@@ -214,6 +230,15 @@ class TfEditorPainter extends CustomPainter {
       String lastPointUuid = actionPointQueue.last;
       Offset lastPoint = toolData.points[lastPointUuid]!;
       canvas.drawLine(lastPoint, activeEffectivePointer!, linePaint);
+
+      if (actionPointQueue.length <= 1) return;
+
+      String secondLastPointUuid = actionPointQueue.secondLast;
+      Offset secondLastPoint = toolData.points[secondLastPointUuid]!;
+      Offset direction = lastPoint - secondLastPoint;
+      Offset normalized = direction / direction.distance;
+
+      drawConfirmationMarker(canvas, lastPoint, normalized);
     }
   }
 

@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:logging/logging.dart';
@@ -31,6 +30,25 @@ class TfToolData implements JsonSerializable {
     points[uuid] = point;
     logger.finer('Added point with uuid: $uuid');
     return uuid;
+  }
+
+  void removePoint(String uuid) {
+    logger.finer('Removing point with uuid: $uuid');
+    points.remove(uuid);
+  }
+
+  void addLine(Line line) {
+    logger.finer('Adding line: $line');
+    if (lines.contains(line)) {
+      logger.finer('Line already exists: $line');
+      return;
+    }
+    lines.add(line);
+  }
+
+  void removeLine(Line line) {
+    logger.finer('Removing line: $line');
+    lines.remove(line);
   }
 
   TfToolData.fromJson(Map<String, dynamic> json) {

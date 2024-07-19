@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_tool.dart';
+import 'package:toolfoam/extensions/list_extensions.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_interactive_viewer.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter.dart';
@@ -47,7 +48,7 @@ class _TfEditorState extends State<TfEditor> {
   }
 
   void setTool(EditingTool tool) {
-    notifier.actionPointQueue.clear();
+    notifier.actionPointerStack.clear();
     setState(() {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
@@ -63,16 +64,14 @@ class _TfEditorState extends State<TfEditor> {
     if (activeEditingTool == EditingTool.line) {
       TfToolData toolData = notifier.toolData;
       String pointUuid = toolData.addPoint(effectivePointer);
-      notifier.actionPointQueue.add(pointUuid);
+      notifier.actionPointerStack.add(pointUuid);
 
-      if (notifier.actionPointQueue.length == 2) {
-        logger.fine('Creating line between points: ${notifier.actionPointQueue}');
-        String startUuid = notifier.actionPointQueue.removeFirst();
-        String endUuid = notifier.actionPointQueue.first;
+      if (notifier.actionPointerStack.length >= 2) {
+        String startUuid = notifier.actionPointerStack.secondLast;
+        String endUuid = notifier.actionPointerStack.last;
 
         Line line = Line(startUuid, endUuid);
-        toolData.lines.add(line);
-        logger.finest('All lines: ${toolData.lines}');
+        toolData.addLine(line);
       }
 
       return;
