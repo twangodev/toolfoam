@@ -66,7 +66,7 @@ class TfEditorData extends ChangeNotifier {
 
   MapEntry<String, Offset>? nearestPointSnap(Offset offset) {
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
-      if (TfEditorLogic.interceptsCircle(entry.value, offset, TfEditorConfig.defaultSnapTolerance * scaleInverse)) {
+      if (TfEditorLogic.interceptsCircle(entry.value, offset, TfEditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
         return entry;
       }
     }
