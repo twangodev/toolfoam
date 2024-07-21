@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import '../../models/editing_tool.dart';
 
 class TfEditorConfig {
@@ -28,5 +30,10 @@ class TfEditorConfig {
   static const ucsInnerRadius = 8.5;
 
   static const pointRadius = 5.0;
+
+  static const checkmarkStrokeWidth = 2.0;
+  static const Offset checkmarkStartBias = Offset(-1/2, -1/6);
+  static const Offset checkmarkMiddleBias = Offset(-1/8, 2/7);
+  static const Offset checkmarkEndBias = Offset(1/2, -1/3);
 
 }

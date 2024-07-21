@@ -12,6 +12,10 @@ class TfEditorData extends ChangeNotifier {
     required this.toolData,
   });
 
+  void redraw() {
+    notifyListeners();
+  }
+
   double _scale = 1.0;
 
   double get scale => _scale;
@@ -74,5 +78,18 @@ class TfEditorData extends ChangeNotifier {
 
   TfToolData toolData;
   List<String> actionPointerStack = [];
+
+  double? confirmationRadius;
+  Offset? confirmationMarker;
+
+  bool shouldConfirm(Offset offset) {
+    if (confirmationMarker == null || confirmationRadius == null) return false;
+    return TfEditorLogic.interceptsCircle(confirmationMarker!, offset, confirmationRadius!);
+  }
+
+  bool? get isActiveOnConfirmation {
+    if (activePointer == null) return null;
+    return shouldConfirm(activePointer!);
+  }
 
 }

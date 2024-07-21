@@ -1,9 +1,11 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector2;
+import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import '../../models/line.dart';
 import '../../models/tools/tf_path_data.dart';
@@ -14,6 +16,7 @@ class TfEditorPainter extends CustomPainter {
   final bool toggleGrid;
   final TfEditorData editorData;
   final EditingTool editingTool;
+  final Queue<Function(Canvas)> highestLayer = Queue();
 
   static const Offset origin = Offset(0, 0);
 
@@ -38,12 +41,25 @@ class TfEditorPainter extends CustomPainter {
   late final TfToolData toolData = editorData.toolData;
   late final actionPointQueue = editorData.actionPointerStack;
 
+  bool confirmationMarkerDrawn = false;
+
   late final scaledVisibleRect = Rect.fromLTRB(
       (visibleRect.left / gridSize).floorToDouble(),
       (visibleRect.top / gridSize).ceilToDouble(),
       (visibleRect.right / gridSize).floorToDouble(),
       (visibleRect.bottom / gridSize).ceilToDouble(),
   );
+
+  void registerDataOutput() {
+    confirmationMarkerDrawn = false;
+  }
+
+  void defaultDataOutput() {
+    if (!confirmationMarkerDrawn) {
+      editorData.confirmationMarker = null;
+      editorData.confirmationRadius = null;
+    }
+  }
 
   void drawCenterAxis(Canvas canvas) {
     final Paint xAxis = Paint()
@@ -203,17 +219,45 @@ class TfEditorPainter extends CustomPainter {
   }
 
   void drawConfirmationMarker(Canvas canvas, Offset offset, Offset direction) {
+    confirmationMarkerDrawn = true;
 
-    // TODO make confirmation change based on hover and implement click
+    Paint background = Paint()
+      ..color = Colors.grey.shade800
+      ..strokeWidth = 2 * scaleInverse
+      ..style = PaintingStyle.fill;
 
-    final Paint confirmationPaint = Paint()
-      ..color = Colors.green
+    Paint foreground = Paint()
+      ..color = Colors.grey.shade100
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
+    double confirmationRadius = TfEditorConfig.confirmationMarkerSize * scaleInverse;
+
     Offset perpendicular = Offset(-direction.dy, direction.dx);
     Offset center = offset + perpendicular * TfEditorConfig.confirmationMarkerDistance * scaleInverse;
-    canvas.drawCircle(center, TfEditorConfig.confirmationMarkerSize * scaleInverse, confirmationPaint);
+
+    editorData.confirmationRadius = confirmationRadius;
+    editorData.confirmationMarker = center;
+
+    bool isHovered = editorData.isActiveOnConfirmation!;
+    if (isHovered) background.color = Colors.green;
+
+    final Paint checkmarkPaint = Paint()
+      ..color = isHovered ? Colors.white : Colors.green
+      ..strokeWidth = TfEditorConfig.checkmarkStrokeWidth * scaleInverse;
+
+    Offset start = center + TfEditorConfig.checkmarkStartBias * confirmationRadius;
+    Offset middle = center + TfEditorConfig.checkmarkMiddleBias * confirmationRadius;
+    Offset end = center + TfEditorConfig.checkmarkEndBias * confirmationRadius;
+
+    highestLayer.add((Canvas canvas) {
+      canvas.drawCircle(center, confirmationRadius, background);
+      canvas.drawCircle(center, confirmationRadius, foreground);
+
+      canvas.drawLine(start, middle, checkmarkPaint);
+      canvas.drawCircle(middle, checkmarkPaint.strokeWidth / 2, checkmarkPaint);
+      canvas.drawLine(middle, end, checkmarkPaint);
+    });
 
   }
 
@@ -242,8 +286,17 @@ class TfEditorPainter extends CustomPainter {
     }
   }
 
+  void drawHighestLayer(Canvas canvas) {
+    while (highestLayer.isNotEmpty) {
+      Function(Canvas) function = highestLayer.removeFirst();
+      function(canvas);
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) { // TODO get rid of all the null assertions by passing in the null-asserted values rather than using attributes
+    registerDataOutput();
+
     establishGrid(canvas);
     establishCenterMarkings(canvas);
 
@@ -252,6 +305,10 @@ class TfEditorPainter extends CustomPainter {
 
     drawEditToolPreview(canvas);
     establishMarker(canvas);
+
+    drawHighestLayer(canvas);
+
+    defaultDataOutput();
   }
 
   @override

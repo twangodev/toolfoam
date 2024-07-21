@@ -62,6 +62,14 @@ class _TfEditorState extends State<TfEditor> {
     Offset effectivePointer = notifier.effectivePointerCoordinates(scenePointer);
 
     if (activeEditingTool == EditingTool.line) {
+
+      if (notifier.shouldConfirm(scenePointer)) {
+        logger.finer('Confirming line, clearing action stack');
+        notifier.actionPointerStack.clear();
+        notifier.redraw();
+        return;
+      }
+
       TfToolData toolData = notifier.toolData;
       String pointUuid = toolData.addPoint(effectivePointer);
       notifier.actionPointerStack.add(pointUuid);
