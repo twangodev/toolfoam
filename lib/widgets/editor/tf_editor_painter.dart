@@ -182,7 +182,7 @@ class TfEditorPainter extends CustomPainter {
   void establishMarker(Canvas canvas) {
   if (!editingTool.allowsMarker || activePointer == null) return;
     if (toolData.points.values.contains(activeEffectivePointer!)) {
-      drawSnapMarker(canvas, activePointerGridSnap!);
+      drawSnapMarker(canvas, activeEffectivePointer!);
       return;
     }
 

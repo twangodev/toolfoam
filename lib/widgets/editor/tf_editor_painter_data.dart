@@ -1,5 +1,6 @@
 import 'dart:collection' show LinkedList, Queue;
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:toolfoam/models/tools/tf_path_data.dart';
@@ -63,10 +64,22 @@ class TfEditorData extends ChangeNotifier {
     return shouldSnapToGrid(activePointer!);
   }
 
-  Offset effectivePointerCoordinates(Offset offset) {
-    if (shouldSnapToGrid(offset)) {
-      return gridSnap(offset);
+  MapEntry<String, Offset>? nearestPointSnap(Offset offset) {
+    for (MapEntry<String, Offset> entry in toolData.points.entries) {
+      if (TfEditorLogic.interceptsCircle(entry.value, offset, TfEditorConfig.defaultSnapTolerance * scaleInverse)) {
+        return entry;
+      }
     }
+
+    return null;
+  }
+
+  Offset effectivePointerCoordinates(Offset offset) {
+
+    MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset);
+    if (pointSnap != null) return pointSnap.value;
+    if (shouldSnapToGrid(offset)) return gridSnap(offset);
+
 
     return offset;
   }
