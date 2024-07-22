@@ -8,9 +8,7 @@ import '../entity.dart';
 import '../json_serializable.dart';
 import '../line.dart';
 
-
 class TfToolData implements JsonSerializable {
-
   static final Logger logger = Logger('TfToolData');
 
   HashBiMap<String, Offset> points = HashBiMap();
@@ -63,8 +61,8 @@ class TfToolData implements JsonSerializable {
 
   @override
   Map<String, dynamic> toJson() => {
-    'points': points.map((key, value) => MapEntry(key, [value.dx, value.dy])),
-    'lines': lines.map((line) => line.toJson()).toList(),
-  };
-
+        'points':
+            points.map((key, value) => MapEntry(key, [value.dx, value.dy])),
+        'lines': lines.map((line) => line.toJson()).toList(),
+      };
 }

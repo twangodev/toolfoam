@@ -15,21 +15,19 @@ import '../../models/line.dart';
 import '../../models/tools/tf_path_data.dart';
 
 class TfEditor extends StatefulWidget {
-
   final TfTool tool;
 
   const TfEditor({super.key, required this.tool});
 
   @override
   State<TfEditor> createState() => _TfEditorState();
-
 }
 
 class _TfEditorState extends State<TfEditor> {
-
   static final logger = Logger('TFEditorState');
 
-  final TransformationController transformationController = TransformationController();
+  final TransformationController transformationController =
+      TransformationController();
 
   late final TfEditorData notifier = TfEditorData(toolData: widget.tool.data);
 
@@ -59,10 +57,10 @@ class _TfEditorState extends State<TfEditor> {
     logger.finer('Pointer down event: $event');
     if (activeEditingTool == EditingTool.pan) return;
     Offset scenePointer = transformationController.toScene(event.localPosition);
-    Offset effectivePointer = notifier.effectivePointerCoordinates(scenePointer);
+    Offset effectivePointer =
+        notifier.effectivePointerCoordinates(scenePointer);
 
     if (activeEditingTool == EditingTool.line) {
-
       if (notifier.shouldConfirm(scenePointer)) {
         logger.finer('Confirming line, clearing action stack');
         notifier.actionPointerStack.clear();
@@ -87,7 +85,8 @@ class _TfEditorState extends State<TfEditor> {
   }
 
   void updatePointer(PointerEvent event) {
-    notifier.activePointer = transformationController.toScene(event.localPosition);
+    notifier.activePointer =
+        transformationController.toScene(event.localPosition);
   }
 
   @override
@@ -100,7 +99,8 @@ class _TfEditorState extends State<TfEditor> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (initialMove) return;
-      transformationController.value = Matrix4.identity()..translate(viewerSize.width / 2, viewerSize.height / 2);
+      transformationController.value = Matrix4.identity()
+        ..translate(viewerSize.width / 2, viewerSize.height / 2);
       initialMove = true;
     });
   }
@@ -110,65 +110,61 @@ class _TfEditorState extends State<TfEditor> {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(8),
-      child: Card(
-        color: colorScheme.surfaceContainerLow,
-        child: Column(
-          children: [
-            TfEditorToolbar(
-              onToggleGrid: toggleGrid,
-              setTool: setTool,
-            ),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  viewerSize = Size(constraints.maxWidth, constraints.maxHeight);
+        padding: const EdgeInsets.all(8),
+        child: Card(
+            color: colorScheme.surfaceContainerLow,
+            child: Column(
+              children: [
+                TfEditorToolbar(
+                  onToggleGrid: toggleGrid,
+                  setTool: setTool,
+                ),
+                Expanded(child: LayoutBuilder(builder:
+                    (BuildContext context, BoxConstraints constraints) {
+                  viewerSize =
+                      Size(constraints.maxWidth, constraints.maxHeight);
                   return Listener(
-                    onPointerDown: onPointerDown,
-                    onPointerMove: updatePointer,
-                    onPointerHover: updatePointer,
-                    onPointerPanZoomStart: updatePointer,
-                    onPointerPanZoomUpdate: updatePointer,
-                    onPointerPanZoomEnd: updatePointer,
-                    child: MouseRegion(
-                      onExit: (PointerExitEvent event) {
-                        notifier.activePointer = null;
-                      },
-                      cursor: activeEditingTool.preferredCursor,
-                      child: TfEditorInteractiveViewer.builder(
-                        boundaryMargin: const EdgeInsets.all(double.infinity),
-                        minScale: TfEditorConfig.minScale,
-                        maxScale: TfEditorConfig.maxScale,
-                        transformationController: transformationController,
-                        illegalMousePanSet: const {kPrimaryMouseButton},
-                        ignoreIllegalMousePan: allowPrimaryMouseButtonPan,
-                        interactionEndFrictionCoefficient: TfEditorConfig.frictionCoefficient,
-                        builder: (BuildContext context, Quad viewport) {
-                          return ListenableBuilder(
-                            listenable: notifier,
-                            builder: (BuildContext context, Widget? child) {
-                              return CustomPaint(
-                                painter: TfEditorPainter(
-                                  viewport: viewport,
-                                  editorData: notifier,
-                                  toggleGrid: gridToggleState,
-                                  editingTool: activeEditingTool,
-                                ),
-                                size: Size(constraints.maxWidth, constraints.maxHeight),
-                              );
-                            }
-                          );
-                        }
-                      )
-                    )
-                  );
-                }
-              )
-            )
-          ],
-        )
-      )
-    );
+                      onPointerDown: onPointerDown,
+                      onPointerMove: updatePointer,
+                      onPointerHover: updatePointer,
+                      onPointerPanZoomStart: updatePointer,
+                      onPointerPanZoomUpdate: updatePointer,
+                      onPointerPanZoomEnd: updatePointer,
+                      child: MouseRegion(
+                          onExit: (PointerExitEvent event) {
+                            notifier.activePointer = null;
+                          },
+                          cursor: activeEditingTool.preferredCursor,
+                          child: TfEditorInteractiveViewer.builder(
+                              boundaryMargin:
+                                  const EdgeInsets.all(double.infinity),
+                              minScale: TfEditorConfig.minScale,
+                              maxScale: TfEditorConfig.maxScale,
+                              transformationController:
+                                  transformationController,
+                              illegalMousePanSet: const {kPrimaryMouseButton},
+                              ignoreIllegalMousePan: allowPrimaryMouseButtonPan,
+                              interactionEndFrictionCoefficient:
+                                  TfEditorConfig.frictionCoefficient,
+                              builder: (BuildContext context, Quad viewport) {
+                                return ListenableBuilder(
+                                    listenable: notifier,
+                                    builder:
+                                        (BuildContext context, Widget? child) {
+                                      return CustomPaint(
+                                        painter: TfEditorPainter(
+                                          viewport: viewport,
+                                          editorData: notifier,
+                                          toggleGrid: gridToggleState,
+                                          editingTool: activeEditingTool,
+                                        ),
+                                        size: Size(constraints.maxWidth,
+                                            constraints.maxHeight),
+                                      );
+                                    });
+                              })));
+                }))
+              ],
+            )));
   }
-
 }

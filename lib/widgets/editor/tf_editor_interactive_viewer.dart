@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 
-
 /// A widget that enables pan and zoom interactions with its child.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zrn7V3bMJvg}
@@ -65,19 +64,21 @@ class TfEditorInteractiveViewer extends StatefulWidget {
     this.illegalMousePanSet = const {},
     this.ignoreIllegalMousePan = false,
     required Widget this.child,
-  }) : assert(minScale > 0),
+  })  : assert(minScale > 0),
         assert(interactionEndFrictionCoefficient >= 0),
         assert(minScale.isFinite),
         assert(maxScale > 0),
         assert(!maxScale.isNaN),
         assert(maxScale >= minScale),
-  // boundaryMargin must be either fully infinite or fully finite, but not
-  // a mix of both.
+        // boundaryMargin must be either fully infinite or fully finite, but not
+        // a mix of both.
         assert(
-        (boundaryMargin.horizontal.isInfinite
-            && boundaryMargin.vertical.isInfinite) || (boundaryMargin.top.isFinite
-            && boundaryMargin.right.isFinite && boundaryMargin.bottom.isFinite
-            && boundaryMargin.left.isFinite),
+          (boundaryMargin.horizontal.isInfinite &&
+                  boundaryMargin.vertical.isInfinite) ||
+              (boundaryMargin.top.isFinite &&
+                  boundaryMargin.right.isFinite &&
+                  boundaryMargin.bottom.isFinite &&
+                  boundaryMargin.left.isFinite),
         ),
         builder = null;
 
@@ -110,20 +111,21 @@ class TfEditorInteractiveViewer extends StatefulWidget {
     this.illegalMousePanSet = const {},
     this.ignoreIllegalMousePan = false,
     required InteractiveViewerWidgetBuilder this.builder,
-  }) : assert(minScale > 0),
+  })  : assert(minScale > 0),
         assert(interactionEndFrictionCoefficient >= 0),
         assert(minScale.isFinite),
         assert(maxScale > 0),
         assert(!maxScale.isNaN),
         assert(maxScale >= minScale),
-  // boundaryMargin must be either fully infinite or fully finite, but not
-  // a mix of both.
+        // boundaryMargin must be either fully infinite or fully finite, but not
+        // a mix of both.
         assert(
-        (boundaryMargin.horizontal.isInfinite && boundaryMargin.vertical.isInfinite) ||
-            (boundaryMargin.top.isFinite &&
-                boundaryMargin.right.isFinite &&
-                boundaryMargin.bottom.isFinite &&
-                boundaryMargin.left.isFinite),
+          (boundaryMargin.horizontal.isInfinite &&
+                  boundaryMargin.vertical.isInfinite) ||
+              (boundaryMargin.top.isFinite &&
+                  boundaryMargin.right.isFinite &&
+                  boundaryMargin.bottom.isFinite &&
+                  boundaryMargin.left.isFinite),
         ),
         constrained = false,
         child = null;
@@ -376,8 +378,8 @@ class TfEditorInteractiveViewer extends StatefulWidget {
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
   static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
-    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
-        + math.pow(l2.y - l1.y, 2.0).toDouble();
+    final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble() +
+        math.pow(l2.y - l1.y, 2.0).toDouble();
 
     // In this case, l1 == l2.
     if (lengthSquared == 0) {
@@ -388,7 +390,8 @@ class TfEditorInteractiveViewer extends StatefulWidget {
     // the point.
     final Vector3 l1P = point - l1;
     final Vector3 l1L2 = l2 - l1;
-    final double fraction = clampDouble(l1P.dot(l1L2) / lengthSquared, 0.0, 1.0);
+    final double fraction =
+        clampDouble(l1P.dot(l1L2) / lengthSquared, 0.0, 1.0);
     return l1 + l1L2 * fraction;
   }
 
@@ -472,16 +475,21 @@ class TfEditorInteractiveViewer extends StatefulWidget {
 
     // Otherwise, return the nearest point on the quad.
     final List<Vector3> closestPoints = <Vector3>[
-      TfEditorInteractiveViewer.getNearestPointOnLine(point, quad.point0, quad.point1),
-      TfEditorInteractiveViewer.getNearestPointOnLine(point, quad.point1, quad.point2),
-      TfEditorInteractiveViewer.getNearestPointOnLine(point, quad.point2, quad.point3),
-      TfEditorInteractiveViewer.getNearestPointOnLine(point, quad.point3, quad.point0),
+      TfEditorInteractiveViewer.getNearestPointOnLine(
+          point, quad.point0, quad.point1),
+      TfEditorInteractiveViewer.getNearestPointOnLine(
+          point, quad.point1, quad.point2),
+      TfEditorInteractiveViewer.getNearestPointOnLine(
+          point, quad.point2, quad.point3),
+      TfEditorInteractiveViewer.getNearestPointOnLine(
+          point, quad.point3, quad.point0),
     ];
     double minDistance = double.infinity;
     late Vector3 closestOverall;
     for (final Vector3 closePoint in closestPoints) {
       final double distance = math.sqrt(
-        math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
+        math.pow(point.x - closePoint.x, 2) +
+            math.pow(point.y - closePoint.y, 2),
       );
       if (distance < minDistance) {
         minDistance = distance;
@@ -492,10 +500,12 @@ class TfEditorInteractiveViewer extends StatefulWidget {
   }
 
   @override
-  State<TfEditorInteractiveViewer> createState() => _TfEditorInteractiveViewerState();
+  State<TfEditorInteractiveViewer> createState() =>
+      _TfEditorInteractiveViewerState();
 }
 
-class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> with TickerProviderStateMixin {
+class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer>
+    with TickerProviderStateMixin {
   TransformationController? _transformationController;
 
   final GlobalKey _childKey = GlobalKey();
@@ -528,22 +538,24 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     assert(!widget.boundaryMargin.top.isNaN);
     assert(!widget.boundaryMargin.bottom.isNaN);
 
-    final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox childRenderBox =
+        _childKey.currentContext!.findRenderObject()! as RenderBox;
     final Size childSize = childRenderBox.size;
-    final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
+    final Rect boundaryRect =
+        widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     assert(
-    !boundaryRect.isEmpty,
-    "InteractiveViewer's child must have nonzero dimensions.",
+      !boundaryRect.isEmpty,
+      "InteractiveViewer's child must have nonzero dimensions.",
     );
     // Boundaries that are partially infinite are not allowed because Matrix4's
     // rotation and translation methods don't handle infinites well.
     assert(
-    boundaryRect.isFinite ||
-        (boundaryRect.left.isInfinite
-            && boundaryRect.top.isInfinite
-            && boundaryRect.right.isInfinite
-            && boundaryRect.bottom.isInfinite),
-    'boundaryRect must either be infinite in all directions or finite in all directions.',
+      boundaryRect.isFinite ||
+          (boundaryRect.left.isInfinite &&
+              boundaryRect.top.isInfinite &&
+              boundaryRect.right.isInfinite &&
+              boundaryRect.bottom.isInfinite),
+      'boundaryRect must either be infinite in all directions or finite in all directions.',
     );
     return boundaryRect;
   }
@@ -551,7 +563,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   // The Rect representing the child's parent.
   Rect get _viewport {
     assert(_parentKey.currentContext != null);
-    final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox parentRenderBox =
+        _parentKey.currentContext!.findRenderObject()! as RenderBox;
     return Offset.zero & parentRenderBox.size;
   }
 
@@ -565,20 +578,21 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     final Offset alignedTranslation;
 
     if (_currentAxis != null) {
-      alignedTranslation = switch (widget.panAxis){
+      alignedTranslation = switch (widget.panAxis) {
         PanAxis.horizontal => _alignAxis(translation, Axis.horizontal),
-        PanAxis.vertical   => _alignAxis(translation, Axis.vertical),
-        PanAxis.aligned    => _alignAxis(translation, _currentAxis!),
-        PanAxis.free       => translation,
+        PanAxis.vertical => _alignAxis(translation, Axis.vertical),
+        PanAxis.aligned => _alignAxis(translation, _currentAxis!),
+        PanAxis.free => translation,
       };
     } else {
       alignedTranslation = translation;
     }
 
-    final Matrix4 nextMatrix = matrix.clone()..translate(
-      alignedTranslation.dx,
-      alignedTranslation.dy,
-    );
+    final Matrix4 nextMatrix = matrix.clone()
+      ..translate(
+        alignedTranslation.dx,
+        alignedTranslation.dy,
+      );
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -600,7 +614,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     );
 
     // If the given translation fits completely within the boundaries, allow it.
-    final Offset offendingDistance = _exceedsBy(boundariesAabbQuad, nextViewport);
+    final Offset offendingDistance =
+        _exceedsBy(boundariesAabbQuad, nextViewport);
     if (offendingDistance == Offset.zero) {
       return nextMatrix;
     }
@@ -618,15 +633,18 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix = matrix.clone()..setTranslation(Vector3(
-      correctedTotalTranslation.dx,
-      correctedTotalTranslation.dy,
-      0.0,
-    ));
+    final Matrix4 correctedMatrix = matrix.clone()
+      ..setTranslation(Vector3(
+        correctedTotalTranslation.dx,
+        correctedTotalTranslation.dy,
+        0.0,
+      ));
 
     // Double check that the corrected translation fits.
-    final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
-    final Offset offendingCorrectedDistance = _exceedsBy(boundariesAabbQuad, correctedViewport);
+    final Quad correctedViewport =
+        _transformViewport(correctedMatrix, _viewport);
+    final Offset offendingCorrectedDistance =
+        _exceedsBy(boundariesAabbQuad, correctedViewport);
     if (offendingCorrectedDistance == Offset.zero) {
       return correctedMatrix;
     }
@@ -634,7 +652,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     // If the corrected translation doesn't fit in either direction, don't allow
     // any translation at all. This happens when the viewport is larger than the
     // entire boundary.
-    if (offendingCorrectedDistance.dx != 0.0 && offendingCorrectedDistance.dy != 0.0) {
+    if (offendingCorrectedDistance.dx != 0.0 &&
+        offendingCorrectedDistance.dy != 0.0) {
       return matrix.clone();
     }
 
@@ -644,11 +663,12 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
       offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
       offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
     );
-    return matrix.clone()..setTranslation(Vector3(
-      unidirectionalCorrectedTotalTranslation.dx,
-      unidirectionalCorrectedTotalTranslation.dy,
-      0.0,
-    ));
+    return matrix.clone()
+      ..setTranslation(Vector3(
+        unidirectionalCorrectedTotalTranslation.dx,
+        unidirectionalCorrectedTotalTranslation.dy,
+        0.0,
+      ));
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -661,7 +681,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
 
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
-    final double currentScale = _transformationController!.value.getMaxScaleOnAxis();
+    final double currentScale =
+        _transformationController!.value.getMaxScaleOnAxis();
     final double totalScale = math.max(
       currentScale * scale,
       // Ensure that the scale cannot make the child so big that it can't fit
@@ -671,7 +692,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
         _viewport.height / _boundaryRect.height,
       ),
     );
-    final double clampedTotalScale = clampDouble(totalScale,
+    final double clampedTotalScale = clampDouble(
+      totalScale,
       widget.minScale,
       widget.maxScale,
     );
@@ -688,8 +710,7 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     final Offset focalPointScene = _transformationController!.toScene(
       focalPoint,
     );
-    return matrix
-        .clone()
+    return matrix.clone()
       ..translate(focalPointScene.dx, focalPointScene.dy)
       ..rotateZ(-rotation)
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
@@ -723,7 +744,6 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
-
     widget.onInteractionStart?.call(details);
 
     if (_controller.isAnimating) {
@@ -750,13 +770,11 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     if (!widget.ignoreIllegalMousePan && isUsingIllegalMouse) {
       activelyRejectingIllegalMouse = true;
     }
-
   }
 
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
-
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
     _scaleAnimationFocalPoint = details.localFocalPoint;
     final Offset focalPointScene = _transformationController!.toScene(
@@ -828,7 +846,6 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
         _currentRotation = desiredRotation;
 
       case _GestureType.pan:
-
         assert(_referenceFocalPoint != null);
 
         if (activelyRejectingIllegalMouse) {
@@ -845,7 +862,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
         _currentAxis ??= _getPanAxis(_referenceFocalPoint!, focalPointScene);
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
-        final Offset translationChange = focalPointScene - _referenceFocalPoint!;
+        final Offset translationChange =
+            focalPointScene - _referenceFocalPoint!;
         _transformationController!.value = _matrixTranslate(
           _transformationController!.value,
           translationChange,
@@ -860,7 +878,6 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
   // are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
-
     widget.onInteractionEnd?.call(details);
     _scaleStart = null;
     _rotationStart = null;
@@ -883,17 +900,15 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
 
     switch (_gestureType) {
       case _GestureType.pan:
-
-
         if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
           _currentAxis = null;
           return;
         }
 
-
-
-        final Vector3 translationVector = _transformationController!.value.getTranslation();
-        final Offset translation = Offset(translationVector.x, translationVector.y);
+        final Vector3 translationVector =
+            _transformationController!.value.getTranslation();
+        final Offset translation =
+            Offset(translationVector.x, translationVector.y);
         final FrictionSimulation frictionSimulationX = FrictionSimulation(
           widget.interactionEndFrictionCoefficient,
           translation.dx,
@@ -923,21 +938,21 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
           _currentAxis = null;
           return;
         }
-        final double scale = _transformationController!.value.getMaxScaleOnAxis();
+        final double scale =
+            _transformationController!.value.getMaxScaleOnAxis();
         final FrictionSimulation frictionSimulation = FrictionSimulation(
             widget.interactionEndFrictionCoefficient * widget.scaleFactor,
             scale,
-            details.scaleVelocity / 10
-        );
-        final double tFinal = _getFinalTime(details.scaleVelocity.abs(), widget.interactionEndFrictionCoefficient, effectivelyMotionless: 0.1);
-        _scaleAnimation = Tween<double>(
-            begin: scale,
-            end: frictionSimulation.x(tFinal)
-        ).animate(CurvedAnimation(
-            parent: _scaleController,
-            curve: Curves.decelerate
-        ));
-        _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
+            details.scaleVelocity / 10);
+        final double tFinal = _getFinalTime(details.scaleVelocity.abs(),
+            widget.interactionEndFrictionCoefficient,
+            effectivelyMotionless: 0.1);
+        _scaleAnimation =
+            Tween<double>(begin: scale, end: frictionSimulation.x(tFinal))
+                .animate(CurvedAnimation(
+                    parent: _scaleController, curve: Curves.decelerate));
+        _scaleController.duration =
+            Duration(milliseconds: (tFinal * 1000).round());
         _scaleAnimation!.addListener(_onScaleAnimate);
         _scaleController.forward();
       case _GestureType.rotate || null:
@@ -949,7 +964,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
     if (event is PointerScrollEvent) {
-      if (event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale) {
+      if (event.kind == PointerDeviceKind.trackpad &&
+          !widget.trackpadScrollCausesScale) {
         // Trackpad scroll, so treat it as a pan.
         widget.onInteractionStart?.call(
           ScaleStartDetails(
@@ -984,14 +1000,12 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
 
         _transformationController!.value = _matrixTranslate(
             _transformationController!.value,
-            newFocalPointScene - focalPointScene
-        );
+            newFocalPointScene - focalPointScene);
 
         widget.onInteractionUpdate?.call(ScaleUpdateDetails(
             focalPoint: event.position - event.scrollDelta,
             localFocalPoint: event.localPosition - localDelta,
-            focalPointDelta: -localDelta
-        ));
+            focalPointDelta: -localDelta));
         widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
@@ -1000,8 +1014,7 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
         return;
       }
       scaleChange = math.exp(-event.scrollDelta.dy / widget.scaleFactor);
-    }
-    else if (event is PointerScaleEvent) {
+    } else if (event is PointerScaleEvent) {
       scaleChange = event.scale;
     } else {
       return;
@@ -1060,7 +1073,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
       return;
     }
     // Translate such that the resulting translation is _animation.value.
-    final Vector3 translationVector = _transformationController!.value.getTranslation();
+    final Vector3 translationVector =
+        _transformationController!.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final Offset translationScene = _transformationController!.toScene(
       translation,
@@ -1085,7 +1099,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
       return;
     }
     final double desiredScale = _scaleAnimation!.value;
-    final double scaleChange = desiredScale / _transformationController!.value.getMaxScaleOnAxis();
+    final double scaleChange =
+        desiredScale / _transformationController!.value.getMaxScaleOnAxis();
     final Offset referenceFocalPoint = _transformationController!.toScene(
       _scaleAnimationFocalPoint,
     );
@@ -1117,15 +1132,13 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   void initState() {
     super.initState();
 
-    _transformationController = widget.transformationController
-        ?? TransformationController();
+    _transformationController =
+        widget.transformationController ?? TransformationController();
     _transformationController!.addListener(_onTransformationControllerChange);
     _controller = AnimationController(
       vsync: this,
     );
-    _scaleController = AnimationController(
-        vsync: this
-    );
+    _scaleController = AnimationController(vsync: this);
   }
 
   @override
@@ -1135,20 +1148,27 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
     // transformationControllers.
     if (oldWidget.transformationController == null) {
       if (widget.transformationController != null) {
-        _transformationController!.removeListener(_onTransformationControllerChange);
+        _transformationController!
+            .removeListener(_onTransformationControllerChange);
         _transformationController!.dispose();
         _transformationController = widget.transformationController;
-        _transformationController!.addListener(_onTransformationControllerChange);
+        _transformationController!
+            .addListener(_onTransformationControllerChange);
       }
     } else {
       if (widget.transformationController == null) {
-        _transformationController!.removeListener(_onTransformationControllerChange);
+        _transformationController!
+            .removeListener(_onTransformationControllerChange);
         _transformationController = TransformationController();
-        _transformationController!.addListener(_onTransformationControllerChange);
-      } else if (widget.transformationController != oldWidget.transformationController) {
-        _transformationController!.removeListener(_onTransformationControllerChange);
+        _transformationController!
+            .addListener(_onTransformationControllerChange);
+      } else if (widget.transformationController !=
+          oldWidget.transformationController) {
+        _transformationController!
+            .removeListener(_onTransformationControllerChange);
         _transformationController = widget.transformationController;
-        _transformationController!.addListener(_onTransformationControllerChange);
+        _transformationController!
+            .addListener(_onTransformationControllerChange);
       }
     }
   }
@@ -1157,7 +1177,8 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
   void dispose() {
     _controller.dispose();
     _scaleController.dispose();
-    _transformationController!.removeListener(_onTransformationControllerChange);
+    _transformationController!
+        .removeListener(_onTransformationControllerChange);
     if (widget.transformationController == null) {
       _transformationController!.dispose();
     }
@@ -1216,7 +1237,7 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer> w
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,
         trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
-        trackpadScrollToScaleFactor: Offset(0, -1/widget.scaleFactor),
+        trackpadScrollToScaleFactor: Offset(0, -1 / widget.scaleFactor),
         child: child,
       ),
     );
@@ -1281,7 +1302,8 @@ enum _GestureType {
 
 // Given a velocity and drag, calculate the time at which motion will come to
 // a stop, within the margin of effectivelyMotionless.
-double _getFinalTime(double velocity, double drag, {double effectivelyMotionless = 10}) {
+double _getFinalTime(double velocity, double drag,
+    {double effectivelyMotionless = 10}) {
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
 }
 
@@ -1342,11 +1364,15 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
 // Offset.zero.
 Offset _exceedsBy(Quad boundary, Quad viewport) {
   final List<Vector3> viewportPoints = <Vector3>[
-    viewport.point0, viewport.point1, viewport.point2, viewport.point3,
+    viewport.point0,
+    viewport.point1,
+    viewport.point2,
+    viewport.point3,
   ];
   Offset largestExcess = Offset.zero;
   for (final Vector3 point in viewportPoints) {
-    final Vector3 pointInside = TfEditorInteractiveViewer.getNearestPointInside(point, boundary);
+    final Vector3 pointInside =
+        TfEditorInteractiveViewer.getNearestPointInside(point, boundary);
     final Offset excess = Offset(
       pointInside.x - point.x,
       pointInside.y - point.y,
@@ -1376,7 +1402,7 @@ Offset _round(Offset offset) {
 Offset _alignAxis(Offset offset, Axis axis) {
   return switch (axis) {
     Axis.horizontal => Offset(offset.dx, 0.0),
-    Axis.vertical   => Offset(0.0, offset.dy),
+    Axis.vertical => Offset(0.0, offset.dy),
   };
 }
 

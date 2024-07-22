@@ -12,21 +12,22 @@ import '../widgets/breadcrumb.dart';
 import '../widgets/dialogs/tool_details_dialog.dart';
 
 class ToolsPage extends StatefulWidget {
-
   final List<BreadcrumbItem> breadcrumbItems;
 
   final TfCollection? selectedCollection;
   final Function(TfCollection?) onCollectionSelected;
 
-  const ToolsPage({super.key, required this.selectedCollection, required this.onCollectionSelected, required this.breadcrumbItems});
+  const ToolsPage(
+      {super.key,
+      required this.selectedCollection,
+      required this.onCollectionSelected,
+      required this.breadcrumbItems});
 
   @override
   State<ToolsPage> createState() => _ToolsPageState();
-
 }
 
 class _ToolsPageState extends State<ToolsPage> {
-
   static final Logger logger = Logger('ToolsPage');
 
   final GlobalKey _gridKey = GlobalKey();
@@ -43,16 +44,15 @@ class _ToolsPageState extends State<ToolsPage> {
   }
 
   void onAddTool() async {
-    TfTool(uuid: Entity.uuidGenerator.v4(), owner: widget.selectedCollection!).create('New Tool');
+    TfTool(uuid: Entity.uuidGenerator.v4(), owner: widget.selectedCollection!)
+        .create('New Tool');
     await refreshTools();
   }
 
   void onTap(BuildContext context, TfTool tool) async {
     logger.info('Opening tool ${tool.uuid} (${tool.metadata.name})');
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ToolEditorPage(tool: tool))
-    );
+    await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => ToolEditorPage(tool: tool)));
     logger.info('Tool ${tool.uuid} (${tool.metadata.name}) closed');
     await refreshTools();
   }
@@ -70,7 +70,8 @@ class _ToolsPageState extends State<ToolsPage> {
   }
 
   void onDetails(BuildContext context, TfTool tool) {
-    showDialog(context: context, builder: (context) => ToolDetailsDialog(tool: tool));
+    showDialog(
+        context: context, builder: (context) => ToolDetailsDialog(tool: tool));
   }
 
   @override
@@ -91,66 +92,59 @@ class _ToolsPageState extends State<ToolsPage> {
 
   @override
   Widget build(BuildContext context) {
-
     ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return RequiredActiveCollectionContainerWidget(
-      selectedCollection: widget.selectedCollection,
-      onCollectionSelected: widget.onCollectionSelected,
-      child: Card(
-        color: colorScheme.surfaceContainerLow,
-        elevation: 0,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          child: Column(
-            children: [
-              ItemManagementToolbar(
-                title: 'Tools',
-                addItemTooltip: 'Add a new tool',
-                onAddFolder: () {
-                  throw UnimplementedError(); // TODO
-                },
-                onAddItem: onAddTool,
-              ),
-              Expanded(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: tools.length,
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 500,
-                        childAspectRatio: 16 / 9,
-                      ),
-                      itemBuilder: (BuildContext context, int index) {
-                        TfTool tool = tools[index];
-                        return ItemCard(
-                          key: ObjectKey(tool),
-                          name: tool.metadata.name ?? 'Unnamed Tool',
-                          preview: null,
-                          onTap: () { onTap(context, tool); },
-                          onRename: (String name) {
-                            renameTool(tool, name);
-                          },
-                          onDetails: () {
-                            onDetails(context, tool);
-                          },
-                          onDelete: () {
-                            onDelete(tool);
-                          },
-                        );
-                      },
-                    )
-                  ]
-                )
-            )
-            ]
-          ),
-        )
-      )
-    );
+        selectedCollection: widget.selectedCollection,
+        onCollectionSelected: widget.onCollectionSelected,
+        child: Card(
+            color: colorScheme.surfaceContainerLow,
+            elevation: 0,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              child: Column(children: [
+                ItemManagementToolbar(
+                  title: 'Tools',
+                  addItemTooltip: 'Add a new tool',
+                  onAddFolder: () {
+                    throw UnimplementedError(); // TODO
+                  },
+                  onAddItem: onAddTool,
+                ),
+                Expanded(
+                    child: ListView(shrinkWrap: true, children: [
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: tools.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 500,
+                      childAspectRatio: 16 / 9,
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      TfTool tool = tools[index];
+                      return ItemCard(
+                        key: ObjectKey(tool),
+                        name: tool.metadata.name ?? 'Unnamed Tool',
+                        preview: null,
+                        onTap: () {
+                          onTap(context, tool);
+                        },
+                        onRename: (String name) {
+                          renameTool(tool, name);
+                        },
+                        onDetails: () {
+                          onDetails(context, tool);
+                        },
+                        onDelete: () {
+                          onDelete(tool);
+                        },
+                      );
+                    },
+                  )
+                ]))
+              ]),
+            )));
   }
-
 }

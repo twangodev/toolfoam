@@ -10,15 +10,17 @@ import 'entity.dart';
 import 'metadata.dart';
 
 class TfCollection extends Entity {
-
   TfCollection({required super.uuid});
 
   static Future<Directory> _getCollectionsDirectory() async {
-    return StorageFileSystemUtil.buildDirectory(await StorageFileSystemUtil.getStorage(), OrganizationStructureData.collections);
+    return StorageFileSystemUtil.buildDirectory(
+        await StorageFileSystemUtil.getStorage(),
+        OrganizationStructureData.collections);
   }
 
   Future<Directory> _getCollection() async {
-    return StorageFileSystemUtil.buildDirectory(await _getCollectionsDirectory(), uuid);
+    return StorageFileSystemUtil.buildDirectory(
+        await _getCollectionsDirectory(), uuid);
   }
 
   Future<Directory> _buildDirectoryFromCollection(String path) async {
@@ -31,8 +33,11 @@ class TfCollection extends Entity {
       await collectionsDirectory.create();
       return [];
     }
-    List<Directory> collections = await StorageFileSystemUtil.list<Directory>(collectionsDirectory);
-    return collections.map((dir) => TfCollection(uuid: p.basenameWithoutExtension(dir.path))).toList();
+    List<Directory> collections =
+        await StorageFileSystemUtil.list<Directory>(collectionsDirectory);
+    return collections
+        .map((dir) => TfCollection(uuid: p.basenameWithoutExtension(dir.path)))
+        .toList();
   }
 
   Future<Directory> getToolsDirectory() async {
@@ -40,16 +45,19 @@ class TfCollection extends Entity {
   }
 
   Future<List<TfTool>> listTools() async {
-    List<File> files = await StorageFileSystemUtil.list<File>(await getToolsDirectory());
+    List<File> files =
+        await StorageFileSystemUtil.list<File>(await getToolsDirectory());
     return TfTool.fromFiles(files, this);
   }
 
   Future<Directory> getLayoutsDirectory() async {
-    return await _buildDirectoryFromCollection(OrganizationStructureData.layouts);
+    return await _buildDirectoryFromCollection(
+        OrganizationStructureData.layouts);
   }
 
   Future<File> _getMetadataFile() async {
-    return StorageFileSystemUtil.buildFile(await _getCollection(), OrganizationStructureData.metadata);
+    return StorageFileSystemUtil.buildFile(
+        await _getCollection(), OrganizationStructureData.metadata);
   }
 
   @override
@@ -95,7 +103,8 @@ class TfCollection extends Entity {
       Map<String, dynamic> json = jsonDecode(rawJson);
       return Metadata.fromJson(json);
     } else {
-      return _initMetadata(uuid); // Weird case where directory exists without metadata? TODO documentation or throw some weird error
+      return _initMetadata(
+          uuid); // Weird case where directory exists without metadata? TODO documentation or throw some weird error
     }
   }
 
@@ -104,7 +113,8 @@ class TfCollection extends Entity {
   }
 
   Future writeMetadata(Metadata metadata) async {
-    File metadataFile = StorageFileSystemUtil.buildFile(await _getCollection(), OrganizationStructureData.metadata);
+    File metadataFile = StorageFileSystemUtil.buildFile(
+        await _getCollection(), OrganizationStructureData.metadata);
     await StorageFileSystemUtil.writeToFile(metadataFile, jsonEncode(metadata));
   }
 
@@ -115,7 +125,7 @@ class TfCollection extends Entity {
   }
 
   @override
-  bool operator == (Object other) {
+  bool operator ==(Object other) {
     if (other is TfCollection) {
       return uuid == other.uuid;
     } else {
@@ -125,5 +135,4 @@ class TfCollection extends Entity {
 
   @override
   int get hashCode => uuid.hashCode;
-
 }

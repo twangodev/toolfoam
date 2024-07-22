@@ -7,7 +7,6 @@ import 'package:relative_time/relative_time.dart';
 import 'package:toolfoam/pages/home_page.dart';
 
 void main() async {
-
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
     if (kDebugMode) {

@@ -8,7 +8,6 @@ import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
 import 'package:toolfoam/widgets/editor/tf_editor_logic.dart';
 
 class TfEditorData extends ChangeNotifier {
-
   TfEditorData({
     required this.toolData,
   });
@@ -29,8 +28,13 @@ class TfEditorData extends ChangeNotifier {
   double get scaleInverse => 1 / scale;
 
   double get effectiveGridSize => TfEditorConfig.minorGridSize * scale;
-  int get gridRatio => (log(TfEditorConfig.effectiveMinorGridSizeMinimum / effectiveGridSize) / log(TfEditorConfig.majorGridDensity)).ceil();
-  double get gridSize => TfEditorConfig.minorGridSize * pow(TfEditorConfig.majorGridDensity, gridRatio);
+  int get gridRatio =>
+      (log(TfEditorConfig.effectiveMinorGridSizeMinimum / effectiveGridSize) /
+              log(TfEditorConfig.majorGridDensity))
+          .ceil();
+  double get gridSize =>
+      TfEditorConfig.minorGridSize *
+      pow(TfEditorConfig.majorGridDensity, gridRatio);
 
   Offset? _activePointer;
   Offset? get activePointer => _activePointer;
@@ -56,17 +60,19 @@ class TfEditorData extends ChangeNotifier {
     Offset snapped = gridSnap(offset);
     double snapTolerance = TfEditorConfig.defaultSnapTolerance;
     if (snapped == Offset.zero) snapTolerance = TfEditorConfig.ucsRadius * 2;
-    return TfEditorLogic.interceptsSquare(snapped, offset, snapTolerance * scaleInverse);
+    return TfEditorLogic.interceptsSquare(
+        snapped, offset, snapTolerance * scaleInverse);
   }
 
-  bool? get activeShouldSnapToGrid  {
+  bool? get activeShouldSnapToGrid {
     if (activePointer == null) return null;
     return shouldSnapToGrid(activePointer!);
   }
 
   MapEntry<String, Offset>? nearestPointSnap(Offset offset) {
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
-      if (TfEditorLogic.interceptsCircle(entry.value, offset, TfEditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
+      if (TfEditorLogic.interceptsCircle(entry.value, offset,
+          TfEditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
         return entry;
       }
     }
@@ -75,11 +81,9 @@ class TfEditorData extends ChangeNotifier {
   }
 
   Offset effectivePointerCoordinates(Offset offset) {
-
     MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset);
     if (pointSnap != null) return pointSnap.value;
     if (shouldSnapToGrid(offset)) return gridSnap(offset);
-
 
     return offset;
   }
@@ -97,12 +101,12 @@ class TfEditorData extends ChangeNotifier {
 
   bool shouldConfirm(Offset offset) {
     if (confirmationMarker == null || confirmationRadius == null) return false;
-    return TfEditorLogic.interceptsCircle(confirmationMarker!, offset, confirmationRadius!);
+    return TfEditorLogic.interceptsCircle(
+        confirmationMarker!, offset, confirmationRadius!);
   }
 
   bool? get isActiveOnConfirmation {
     if (activePointer == null) return null;
     return shouldConfirm(activePointer!);
   }
-
 }

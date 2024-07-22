@@ -8,18 +8,16 @@ import '../models/tf_collection.dart';
 import '../widgets/animation_timings.dart';
 
 class HomePage extends StatefulWidget {
-
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
-
 }
 
 class _HomePageState extends State<HomePage> {
-
   final _pageController = PageController();
-  final TextBreadcrumbItem _headerBreadcrumbItem = const TextBreadcrumbItem(text: 'Toolfoam');
+  final TextBreadcrumbItem _headerBreadcrumbItem =
+      const TextBreadcrumbItem(text: 'Toolfoam');
 
   String? name;
   int? selectedPage = 0;
@@ -41,15 +39,12 @@ class _HomePageState extends State<HomePage> {
       return items;
     }
 
-    items.add(
-      RenameableBreadcrumbItem(
+    items.add(RenameableBreadcrumbItem(
         text: name ?? selectedCollection?.uuid ?? 'Unknown Project',
         onRename: (String newName) async {
           await selectedCollection?.rename(newName);
           syncCollectionDetails();
-        }
-      )
-    ); // TODO fix null name condition
+        })); // TODO fix null name condition
 
     if (selectedPage == 0) {
       items.add(TextBreadcrumbItem(text: 'Tools', onTap: () {}));
@@ -62,53 +57,51 @@ class _HomePageState extends State<HomePage> {
 
   Widget _drawerHeader() {
     return DrawerHeader(
-      child: Stack(
-        children: [
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(name ?? 'Toolfoam',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  )
-                ),
-                CollectionManagerButton(
-                  selectedCollection: selectedCollection,
-                  onCollectionSelected: _onCollectionSelected,
-                )
-              ]
-            )
-          )
-        ]
-      )
-    );
+        child: Stack(children: [
+      Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              name ?? 'Toolfoam',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
+            )),
+        CollectionManagerButton(
+          selectedCollection: selectedCollection,
+          onCollectionSelected: _onCollectionSelected,
+        )
+      ]))
+    ]));
   }
 
   Widget _buildDrawer(BuildContext context) {
     return Stack(
       children: [
         NavigationDrawer(
-          selectedIndex: selectedPage,
-          onDestinationSelected: (int index) {
-            setState(() {
-              selectedPage = index;
-              _pageController.animateToPage(index,
-                duration: AnimationDurations.normal,
-                curve: Curves.easeInOut
-              );
-            });
-          },
-          children: [
-            _drawerHeader(),
-            const NavigationDrawerDestination(icon: Icon(Icons.construction_rounded, fill: 1,), label: Text('Tools')),
-            const NavigationDrawerDestination(icon: Icon(Icons.space_dashboard_rounded, fill: 1), label: Text('Layouts')),
-          ]
-        ),
+            selectedIndex: selectedPage,
+            onDestinationSelected: (int index) {
+              setState(() {
+                selectedPage = index;
+                _pageController.animateToPage(index,
+                    duration: AnimationDurations.normal,
+                    curve: Curves.easeInOut);
+              });
+            },
+            children: [
+              _drawerHeader(),
+              const NavigationDrawerDestination(
+                  icon: Icon(
+                    Icons.construction_rounded,
+                    fill: 1,
+                  ),
+                  label: Text('Tools')),
+              const NavigationDrawerDestination(
+                  icon: Icon(Icons.space_dashboard_rounded, fill: 1),
+                  label: Text('Layouts')),
+            ]),
       ],
     );
   }
@@ -140,27 +133,24 @@ class _HomePageState extends State<HomePage> {
       drawer: _buildDrawer(context),
       body: Center(
         child: PageView(
-          controller: _pageController,
-          onPageChanged: (int index) {
-            setState(() {
-              selectedPage = index;
-            });
-          },
-          children: [
-            ToolsPage(
-              selectedCollection: selectedCollection,
-              onCollectionSelected: _onCollectionSelected,
-              breadcrumbItems: breadcrumbItems,
-            ),
-            LayoutsPage(
-              selectedCollection: selectedCollection,
-              onCollectionSelected: _onCollectionSelected,
-            ),
-          ]
-        ),
+            controller: _pageController,
+            onPageChanged: (int index) {
+              setState(() {
+                selectedPage = index;
+              });
+            },
+            children: [
+              ToolsPage(
+                selectedCollection: selectedCollection,
+                onCollectionSelected: _onCollectionSelected,
+                breadcrumbItems: breadcrumbItems,
+              ),
+              LayoutsPage(
+                selectedCollection: selectedCollection,
+                onCollectionSelected: _onCollectionSelected,
+              ),
+            ]),
       ),
     );
   }
-
 }
-

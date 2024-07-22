@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class StorageFileSystemUtil {
-
   static final Logger logger = Logger('StorageFileSystemUtil');
 
   static Future<Directory> getStorage() async {
@@ -15,7 +14,7 @@ class StorageFileSystemUtil {
   }
 
   static Directory buildDirectory(Directory dir, String path) {
-    Directory builtDir =  Directory(p.join(dir.path, path));
+    Directory builtDir = Directory(p.join(dir.path, path));
     logger.finest('Directory built: ${builtDir.path}');
     return builtDir;
   }
@@ -26,7 +25,8 @@ class StorageFileSystemUtil {
     return file;
   }
 
-  static File buildFileWithExtension(Directory directory, String filename, String extension) {
+  static File buildFileWithExtension(
+      Directory directory, String filename, String extension) {
     logger.finest('Building file with extension: $filename.$extension');
     return buildFile(directory, p.setExtension(filename, extension));
   }
@@ -38,7 +38,8 @@ class StorageFileSystemUtil {
   }
 
   static Future writeToFile(File file, String data) async {
-    logger.finest('Writing to file (${data.length}): ${file.path} with data: $data');
+    logger.finest(
+        'Writing to file (${data.length}): ${file.path} with data: $data');
     await file.writeAsString(data);
   }
 
@@ -46,5 +47,4 @@ class StorageFileSystemUtil {
     logger.finest('Reading from file: ${file.path}');
     return await file.readAsString();
   }
-
 }

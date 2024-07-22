@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 @immutable
 class Line {
-
   final String point1;
   final String point2;
 
@@ -30,7 +29,7 @@ class Line {
 
   factory Line.fromJson(Iterable json) {
     Iterator iterator = json.iterator;
-    return Line(iterator.current as String, iterator.moveNext() ? iterator.current as String : '');
+    return Line(iterator.current as String,
+        iterator.moveNext() ? iterator.current as String : '');
   }
-
 }

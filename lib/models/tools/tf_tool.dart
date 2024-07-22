@@ -13,7 +13,6 @@ import '../json_serializable.dart';
 import '../tf_collection.dart';
 
 class TfTool extends DiskIOEntity implements JsonSerializable {
-
   static final Logger logger = Logger('TfTool');
 
   TfToolMetadata metadata = TfToolMetadata.empty();
@@ -22,8 +21,9 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
 
   TfTool({required super.uuid, required this.owner});
 
-  TfTool.fromJson(Map<String, dynamic> json, String uuid, this.owner):
-    metadata = TfToolMetadata.fromJson(json['metadata']), super(uuid: uuid);
+  TfTool.fromJson(Map<String, dynamic> json, String uuid, this.owner)
+      : metadata = TfToolMetadata.fromJson(json['metadata']),
+        super(uuid: uuid);
 
   static Future<TfTool> fromFile(File file, TfCollection owner) async {
     String rawJson = await StorageFileSystemUtil.readFromFile(file);
@@ -31,19 +31,24 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     return TfTool.fromJson(json, p.basenameWithoutExtension(file.path), owner);
   }
 
-  static Future<List<TfTool>> fromFiles(List<File> files, TfCollection owner) async {
-    List<Future<TfTool>> futures = files.map((file) => fromFile(file, owner)).toList();
+  static Future<List<TfTool>> fromFiles(
+      List<File> files, TfCollection owner) async {
+    List<Future<TfTool>> futures =
+        files.map((file) => fromFile(file, owner)).toList();
     return await Future.wait(futures);
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'metadata': metadata.toJson(),
-    'data': data.toJson(),
-  };
+        'metadata': metadata.toJson(),
+        'data': data.toJson(),
+      };
 
   Future<File> _getFile() async {
-    return StorageFileSystemUtil.buildFileWithExtension(await owner.getToolsDirectory(), uuid, OrganizationStructureData.toolExtension);
+    return StorageFileSystemUtil.buildFileWithExtension(
+        await owner.getToolsDirectory(),
+        uuid,
+        OrganizationStructureData.toolExtension);
   }
 
   @override
@@ -89,8 +94,4 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   Future<void> delete() async {
     (await _getFile()).delete();
   }
-
 }
-
-
-

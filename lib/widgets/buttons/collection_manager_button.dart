@@ -4,11 +4,13 @@ import '../../models/tf_collection.dart';
 import '../dialogs/collection_manager_dialog.dart';
 
 class CollectionManagerButton extends StatelessWidget {
-
   final TfCollection? selectedCollection;
   final Function(TfCollection?) onCollectionSelected;
 
-  const CollectionManagerButton({super.key, required this.selectedCollection, required this.onCollectionSelected});
+  const CollectionManagerButton(
+      {super.key,
+      required this.selectedCollection,
+      required this.onCollectionSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +18,19 @@ class CollectionManagerButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         showDialog(
-          context: context,
-          builder: (context) => CollectionManagerDialog(
-            selectedCollection: () => selectedCollection,
-            onCollectionSelected: onCollectionSelected,
-          )
-        );
+            context: context,
+            builder: (context) => CollectionManagerDialog(
+                  selectedCollection: () => selectedCollection,
+                  onCollectionSelected: onCollectionSelected,
+                ));
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: colorScheme.onPrimaryContainer,
         backgroundColor: colorScheme.primaryContainer,
       ),
-      child: Text(selectedCollection == null ? 'Manage Collections' : 'Switch Collections'),
+      child: Text(selectedCollection == null
+          ? 'Manage Collections'
+          : 'Switch Collections'),
     );
   }
 }

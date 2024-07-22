@@ -1,5 +1,1 @@
-class Folder<T> {
-
-
-
-}
+class Folder<T> {}

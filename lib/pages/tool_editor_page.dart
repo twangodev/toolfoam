@@ -4,18 +4,15 @@ import 'package:toolfoam/widgets/breadcrumb.dart';
 import 'package:toolfoam/widgets/editor/tf_editor.dart';
 
 class ToolEditorPage extends StatefulWidget {
-
   final TfTool tool;
 
   const ToolEditorPage({super.key, required this.tool});
 
   @override
   State<ToolEditorPage> createState() => _ToolEditorPageState();
-
 }
 
 class _ToolEditorPageState extends State<ToolEditorPage> {
-
   String? name;
 
   void onRename(String newName) {
@@ -38,12 +35,12 @@ class _ToolEditorPageState extends State<ToolEditorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Breadcrumb(items: [RenameableBreadcrumbItem(text: name, onRename: onRename)])
-      ),
+          title: Breadcrumb(items: [
+        RenameableBreadcrumbItem(text: name, onRename: onRename)
+      ])),
       body: Center(
         child: TfEditor(tool: widget.tool),
       ),
     );
   }
-
 }
