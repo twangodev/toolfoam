@@ -1,3 +1,8 @@
+import 'package:flutter_test/flutter_test.dart';
+
 void main() {
-  assert(true); // This is an empty test
+  // Empty test
+  test('Empty test', () {
+    expect(1, 1);
+  });
 }
