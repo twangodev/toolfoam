@@ -30,8 +30,6 @@ class ToolsPage extends StatefulWidget {
 class _ToolsPageState extends State<ToolsPage> {
   static final Logger logger = Logger('ToolsPage');
 
-  final GlobalKey _gridKey = GlobalKey();
-
   List<TfTool> tools = [];
 
   Future<void> refreshTools() async {

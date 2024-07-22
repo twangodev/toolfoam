@@ -214,7 +214,7 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    for (Offset point in toolData!.points.values) {
+    for (Offset point in toolData.points.values) {
       canvas.drawCircle(
           point, TfEditorConfig.pointRadius * scaleInverse, fillPaint);
       canvas.drawCircle(
