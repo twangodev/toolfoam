@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:toolfoam/models/tools/tf_path_data.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_logic.dart';
+import 'package:toolfoam/widgets/editor/editor_config.dart';
+import 'package:toolfoam/widgets/editor/editor_logic.dart';
 
-class TfEditorData extends ChangeNotifier {
-  TfEditorData({
+class EditorData extends ChangeNotifier {
+  EditorData({
     required this.toolData,
   });
 
@@ -25,14 +25,14 @@ class TfEditorData extends ChangeNotifier {
 
   double get scaleInverse => 1 / scale;
 
-  double get effectiveGridSize => TfEditorConfig.minorGridSize * scale;
+  double get effectiveGridSize => EditorConfig.minorGridSize * scale;
   int get gridRatio =>
-      (log(TfEditorConfig.effectiveMinorGridSizeMinimum / effectiveGridSize) /
-              log(TfEditorConfig.majorGridDensity))
+      (log(EditorConfig.effectiveMinorGridSizeMinimum / effectiveGridSize) /
+              log(EditorConfig.majorGridDensity))
           .ceil();
   double get gridSize =>
-      TfEditorConfig.minorGridSize *
-      pow(TfEditorConfig.majorGridDensity, gridRatio);
+      EditorConfig.minorGridSize *
+      pow(EditorConfig.majorGridDensity, gridRatio);
 
   Offset? _activePointer;
   Offset? get activePointer => _activePointer;
@@ -56,9 +56,9 @@ class TfEditorData extends ChangeNotifier {
 
   bool shouldSnapToGrid(Offset offset) {
     Offset snapped = gridSnap(offset);
-    double snapTolerance = TfEditorConfig.defaultSnapTolerance;
-    if (snapped == Offset.zero) snapTolerance = TfEditorConfig.ucsRadius * 2;
-    return TfEditorLogic.interceptsSquare(
+    double snapTolerance = EditorConfig.defaultSnapTolerance;
+    if (snapped == Offset.zero) snapTolerance = EditorConfig.ucsRadius * 2;
+    return EditorLogic.interceptsSquare(
         snapped, offset, snapTolerance * scaleInverse);
   }
 
@@ -69,8 +69,8 @@ class TfEditorData extends ChangeNotifier {
 
   MapEntry<String, Offset>? nearestPointSnap(Offset offset) {
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
-      if (TfEditorLogic.interceptsCircle(entry.value, offset,
-          TfEditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
+      if (EditorLogic.interceptsCircle(entry.value, offset,
+          EditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
         return entry;
       }
     }
@@ -99,7 +99,7 @@ class TfEditorData extends ChangeNotifier {
 
   bool shouldConfirm(Offset offset) {
     if (confirmationMarker == null || confirmationRadius == null) return false;
-    return TfEditorLogic.interceptsCircle(
+    return EditorLogic.interceptsCircle(
         confirmationMarker!, offset, confirmationRadius!);
   }
 

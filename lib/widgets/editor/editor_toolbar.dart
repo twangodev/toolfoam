@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/buttons/toolbar_button.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
+import 'package:toolfoam/widgets/editor/editor_config.dart';
 
-class TfEditorToolbar extends StatefulWidget {
+class EditorToolbar extends StatefulWidget {
   final VoidCallback? attachImage;
   final VoidCallback? onOpen;
   final VoidCallback? onSave;
@@ -20,7 +20,7 @@ class TfEditorToolbar extends StatefulWidget {
 
   final void Function(EditingTool)? setTool;
 
-  const TfEditorToolbar({
+  const EditorToolbar({
     super.key,
     this.attachImage,
     this.onOpen,
@@ -37,12 +37,12 @@ class TfEditorToolbar extends StatefulWidget {
   });
 
   @override
-  State<TfEditorToolbar> createState() => _TfEditorToolbarState();
+  State<EditorToolbar> createState() => _EditorToolbarState();
 }
 
-class _TfEditorToolbarState extends State<TfEditorToolbar> {
+class _EditorToolbarState extends State<EditorToolbar> {
   bool gridToggleState = false;
-  EditingTool activeEditingTool = TfEditorConfig.defaultTool;
+  EditingTool activeEditingTool = EditorConfig.defaultTool;
 
   void toggleGrid() {
     setState(() {
