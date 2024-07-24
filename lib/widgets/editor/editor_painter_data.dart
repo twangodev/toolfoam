@@ -22,7 +22,8 @@ class EditorData extends ChangeNotifier {
   double get scale => _scale;
   set scale(double value) {
     if (value == _scale) return;
-    logger.finest('Scaling update: $value, inverse: ${1 / value}, old: $_scale, ratio: ${value / _scale}');
+    logger.finest(
+        'Scaling update: $value, inverse: ${1 / value}, old: $_scale, ratio: ${value / _scale}');
     _scale = value;
     notifyListeners();
   }

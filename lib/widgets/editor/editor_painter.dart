@@ -310,7 +310,7 @@ class EditorPainter extends CustomPainter {
         text: text,
         style: TextStyle(
           color: Colors.grey.shade500,
-          fontSize: 12 ,
+          fontSize: 12,
         ),
       ),
       textDirection: TextDirection.ltr,
