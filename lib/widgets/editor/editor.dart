@@ -3,40 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_tool.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_interactive_viewer.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_painter.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_toolbar.dart';
+import 'package:toolfoam/widgets/editor/editor_config.dart';
+import 'package:toolfoam/widgets/editor/editor_interactive_viewer.dart';
+import 'package:toolfoam/widgets/editor/editor_painter.dart';
+import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
+import 'package:toolfoam/widgets/editor/editor_toolbar.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../models/editing_tool.dart';
 import '../../models/line.dart';
 import '../../models/tools/tf_path_data.dart';
 
-class TfEditor extends StatefulWidget {
+class Editor extends StatefulWidget {
   final TfTool tool;
 
-  const TfEditor({super.key, required this.tool});
+  const Editor({super.key, required this.tool});
 
   @override
-  State<TfEditor> createState() => _TfEditorState();
+  State<Editor> createState() => _EditorState();
 }
 
-class _TfEditorState extends State<TfEditor> {
+class _EditorState extends State<Editor> {
   static final logger = Logger('TFEditorState');
 
   final TransformationController transformationController =
       TransformationController();
 
-  late final TfEditorData notifier = TfEditorData(toolData: widget.tool.data);
+  late final EditorData notifier = EditorData(toolData: widget.tool.data);
 
   Size viewerSize = Size.zero;
   bool allowPrimaryMouseButtonPan = false;
   bool initialMove = false;
 
   bool gridToggleState = false;
-  EditingTool activeEditingTool = TfEditorConfig.defaultTool;
+  EditingTool activeEditingTool = EditorConfig.defaultTool;
   List<String> actionPointBuffer = [];
 
   void toggleGrid(bool newState) {
@@ -115,7 +115,7 @@ class _TfEditorState extends State<TfEditor> {
             color: colorScheme.surfaceContainerLow,
             child: Column(
               children: [
-                TfEditorToolbar(
+                EditorToolbar(
                   onToggleGrid: toggleGrid,
                   setTool: setTool,
                 ),
@@ -135,24 +135,24 @@ class _TfEditorState extends State<TfEditor> {
                             notifier.activePointer = null;
                           },
                           cursor: activeEditingTool.preferredCursor,
-                          child: TfEditorInteractiveViewer.builder(
+                          child: EditorInteractiveViewer.builder(
                               boundaryMargin:
                                   const EdgeInsets.all(double.infinity),
-                              minScale: TfEditorConfig.minScale,
-                              maxScale: TfEditorConfig.maxScale,
+                              minScale: EditorConfig.minScale,
+                              maxScale: EditorConfig.maxScale,
                               transformationController:
                                   transformationController,
                               illegalMousePanSet: const {kPrimaryMouseButton},
                               ignoreIllegalMousePan: allowPrimaryMouseButtonPan,
                               interactionEndFrictionCoefficient:
-                                  TfEditorConfig.frictionCoefficient,
+                                  EditorConfig.frictionCoefficient,
                               builder: (BuildContext context, Quad viewport) {
                                 return ListenableBuilder(
                                     listenable: notifier,
                                     builder:
                                         (BuildContext context, Widget? child) {
                                       return CustomPaint(
-                                        painter: TfEditorPainter(
+                                        painter: EditorPainter(
                                           viewport: viewport,
                                           editorData: notifier,
                                           toggleGrid: gridToggleState,

@@ -39,9 +39,9 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
 /// ** See code in examples/api/lib/widgets/interactive_viewer/interactive_viewer.0.dart **
 /// {@end-tool}
 @immutable
-class TfEditorInteractiveViewer extends StatefulWidget {
+class EditorInteractiveViewer extends StatefulWidget {
   /// Create an InteractiveViewer.
-  TfEditorInteractiveViewer({
+  EditorInteractiveViewer({
     super.key,
     this.clipBehavior = Clip.hardEdge,
     this.panAxis = PanAxis.free,
@@ -89,7 +89,7 @@ class TfEditorInteractiveViewer extends StatefulWidget {
   ///
   /// See the [builder] attribute docs for an example of using it to optimize a
   /// large child.
-  TfEditorInteractiveViewer.builder({
+  EditorInteractiveViewer.builder({
     super.key,
     this.clipBehavior = Clip.hardEdge,
     this.panAxis = PanAxis.free,
@@ -171,7 +171,7 @@ class TfEditorInteractiveViewer extends StatefulWidget {
 
   /// Builds the child of this widget.
   ///
-  /// Passed with the [TfEditorInteractiveViewer.builder] constructor. Otherwise, the
+  /// Passed with the [EditorInteractiveViewer.builder] constructor. Otherwise, the
   /// [child] parameter must be passed directly, and this is null.
   ///
   /// {@tool dartpad}
@@ -189,7 +189,7 @@ class TfEditorInteractiveViewer extends StatefulWidget {
 
   /// The child [Widget] that is transformed by InteractiveViewer.
   ///
-  /// If the [TfEditorInteractiveViewer.builder] constructor is used, then this will be
+  /// If the [EditorInteractiveViewer.builder] constructor is used, then this will be
   /// null, otherwise it is required.
   final Widget? child;
 
@@ -475,13 +475,13 @@ class TfEditorInteractiveViewer extends StatefulWidget {
 
     // Otherwise, return the nearest point on the quad.
     final List<Vector3> closestPoints = <Vector3>[
-      TfEditorInteractiveViewer.getNearestPointOnLine(
+      EditorInteractiveViewer.getNearestPointOnLine(
           point, quad.point0, quad.point1),
-      TfEditorInteractiveViewer.getNearestPointOnLine(
+      EditorInteractiveViewer.getNearestPointOnLine(
           point, quad.point1, quad.point2),
-      TfEditorInteractiveViewer.getNearestPointOnLine(
+      EditorInteractiveViewer.getNearestPointOnLine(
           point, quad.point2, quad.point3),
-      TfEditorInteractiveViewer.getNearestPointOnLine(
+      EditorInteractiveViewer.getNearestPointOnLine(
           point, quad.point3, quad.point0),
     ];
     double minDistance = double.infinity;
@@ -500,11 +500,11 @@ class TfEditorInteractiveViewer extends StatefulWidget {
   }
 
   @override
-  State<TfEditorInteractiveViewer> createState() =>
-      _TfEditorInteractiveViewerState();
+  State<EditorInteractiveViewer> createState() =>
+      _EditorInteractiveViewerState();
 }
 
-class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer>
+class _EditorInteractiveViewerState extends State<EditorInteractiveViewer>
     with TickerProviderStateMixin {
   TransformationController? _transformationController;
 
@@ -1142,7 +1142,7 @@ class _TfEditorInteractiveViewerState extends State<TfEditorInteractiveViewer>
   }
 
   @override
-  void didUpdateWidget(TfEditorInteractiveViewer oldWidget) {
+  void didUpdateWidget(EditorInteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Handle all cases of needing to dispose and initialize
     // transformationControllers.
@@ -1356,7 +1356,7 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
     rotationMatrix.transform3(Vector3(rect.right, rect.bottom, 0.0)),
     rotationMatrix.transform3(Vector3(rect.left, rect.bottom, 0.0)),
   );
-  return TfEditorInteractiveViewer.getAxisAlignedBoundingBox(boundariesRotated);
+  return EditorInteractiveViewer.getAxisAlignedBoundingBox(boundariesRotated);
 }
 
 // Return the amount that viewport lies outside of boundary. If the viewport
@@ -1372,7 +1372,7 @@ Offset _exceedsBy(Quad boundary, Quad viewport) {
   Offset largestExcess = Offset.zero;
   for (final Vector3 point in viewportPoints) {
     final Vector3 pointInside =
-        TfEditorInteractiveViewer.getNearestPointInside(point, boundary);
+        EditorInteractiveViewer.getNearestPointInside(point, boundary);
     final Offset excess = Offset(
       pointInside.x - point.x,
       pointInside.y - point.y,

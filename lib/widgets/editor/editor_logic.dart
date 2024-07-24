@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-class TfEditorLogic {
+class EditorLogic {
   static bool interceptsSquare(Offset parent, Offset child, double size) {
     Rect rect = Rect.fromCenter(center: parent, width: size, height: size);
     return rect.contains(child);

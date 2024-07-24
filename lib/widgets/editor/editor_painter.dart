@@ -3,23 +3,23 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
 import 'package:toolfoam/models/editing_tool.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_config.dart';
-import 'package:toolfoam/widgets/editor/tf_editor_painter_data.dart';
+import 'package:toolfoam/widgets/editor/editor_config.dart';
+import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import '../../models/line.dart';
 import '../../models/tools/tf_path_data.dart';
 
-class TfEditorPainter extends CustomPainter {
+class EditorPainter extends CustomPainter {
   final Quad viewport;
   final bool toggleGrid;
-  final TfEditorData editorData;
+  final EditorData editorData;
   final EditingTool editingTool;
   final Queue<Function(Canvas)> highestLayer = Queue();
 
   static const Offset origin = Offset(0, 0);
 
-  TfEditorPainter({
+  EditorPainter({
     required this.viewport,
     required this.editorData,
     required this.toggleGrid,
@@ -90,26 +90,26 @@ class TfEditorPainter extends CustomPainter {
 
     Path topLeft = Path()
       ..moveTo(0, 0)
-      ..lineTo(-TfEditorConfig.ucsInnerRadius * scaleInverse, 0)
+      ..lineTo(-EditorConfig.ucsInnerRadius * scaleInverse, 0)
       ..arcToPoint(
-        Offset(0, -TfEditorConfig.ucsInnerRadius * scaleInverse),
-        radius: Radius.circular(TfEditorConfig.ucsInnerRadius * scaleInverse),
+        Offset(0, -EditorConfig.ucsInnerRadius * scaleInverse),
+        radius: Radius.circular(EditorConfig.ucsInnerRadius * scaleInverse),
         clockwise: true,
       )
       ..close();
 
     Path bottomRight = Path()
       ..moveTo(0, 0)
-      ..lineTo(TfEditorConfig.ucsInnerRadius * scaleInverse, 0)
+      ..lineTo(EditorConfig.ucsInnerRadius * scaleInverse, 0)
       ..arcToPoint(
-        Offset(0, TfEditorConfig.ucsInnerRadius * scaleInverse),
-        radius: Radius.circular(TfEditorConfig.ucsInnerRadius * scaleInverse),
+        Offset(0, EditorConfig.ucsInnerRadius * scaleInverse),
+        radius: Radius.circular(EditorConfig.ucsInnerRadius * scaleInverse),
         clockwise: true,
       )
       ..close();
 
     canvas.drawCircle(
-        origin, TfEditorConfig.ucsRadius * scaleInverse, grayUcsBackground);
+        origin, EditorConfig.ucsRadius * scaleInverse, grayUcsBackground);
     canvas.drawPath(topLeft, grayUcsForeground);
     canvas.drawPath(bottomRight, grayUcsForeground);
   }
@@ -137,7 +137,7 @@ class TfEditorPainter extends CustomPainter {
       double y = i * gridSize;
       if (y == 0) continue;
       Paint selectedPaint =
-          (i % TfEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
+          (i % EditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
       canvas.drawLine(Offset(visibleRect.left, y), Offset(visibleRect.right, y),
           selectedPaint);
     }
@@ -149,7 +149,7 @@ class TfEditorPainter extends CustomPainter {
       double x = i * gridSize;
       if (x == 0) continue;
       Paint selectedPaint =
-          (i % TfEditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
+          (i % EditorConfig.majorGridDensity == 0) ? majorGrid : minorGrid;
       canvas.drawLine(Offset(x, visibleRect.top), Offset(x, visibleRect.bottom),
           selectedPaint);
     }
@@ -161,7 +161,7 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double halfSize = TfEditorConfig.crossMarkerSize * scaleInverse / 2;
+    double halfSize = EditorConfig.crossMarkerSize * scaleInverse / 2;
 
     canvas.drawLine(offset.translate(-halfSize, 0),
         offset.translate(halfSize, 0), crossPaint);
@@ -175,8 +175,8 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 1.5 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double defaultSize = TfEditorConfig.defaultSnapTolerance;
-    if (offset == origin) defaultSize = TfEditorConfig.ucsRadius * 2;
+    double defaultSize = EditorConfig.defaultSnapTolerance;
+    if (offset == origin) defaultSize = EditorConfig.ucsRadius * 2;
     double scaledSize = defaultSize * scaleInverse;
     Rect rect =
         Rect.fromCenter(center: offset, width: scaledSize, height: scaledSize);
@@ -216,9 +216,9 @@ class TfEditorPainter extends CustomPainter {
 
     for (Offset point in toolData.points.values) {
       canvas.drawCircle(
-          point, TfEditorConfig.pointRadius * scaleInverse, fillPaint);
+          point, EditorConfig.pointRadius * scaleInverse, fillPaint);
       canvas.drawCircle(
-          point, TfEditorConfig.pointRadius * scaleInverse, strokePaint);
+          point, EditorConfig.pointRadius * scaleInverse, strokePaint);
     }
   }
 
@@ -234,7 +234,94 @@ class TfEditorPainter extends CustomPainter {
     }
   }
 
-  void drawConfirmationMarker(Canvas canvas, Offset offset, Offset direction) {
+  void drawDistanceEdgeMarker(
+      Canvas canvas, Offset offset, Offset perpendicular) {
+    final Paint distancePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5 * scaleInverse;
+
+    double startLength = EditorConfig.distanceMarkerStartOffset * scaleInverse;
+    double endLength = EditorConfig.distanceMarkerEndOffset * scaleInverse;
+
+    Offset start = offset + perpendicular * startLength;
+    Offset end = offset + perpendicular * endLength;
+
+    canvas.drawLine(start, end, distancePaint);
+  }
+
+  void drawArrow(Canvas canvas, Offset head, Offset end) {
+    final Paint linePaint = Paint()
+      ..color = Colors.grey.shade500
+      ..strokeWidth = 0.5 * scaleInverse;
+
+    canvas.drawLine(head, end, linePaint);
+
+    final Paint arrowPaint = Paint()
+      ..color = Colors.grey.shade500
+      ..strokeWidth = 1 * scaleInverse
+      ..style = PaintingStyle.fill;
+
+    Offset delta = head - end;
+    Offset normalized = delta / delta.distance;
+
+    Offset perpendicular = Offset(normalized.dy, -normalized.dx);
+
+    double height = EditorConfig.distanceMarkerArrowHeight * scaleInverse;
+    Offset arrowBase = head - normalized * height;
+
+    // Construct an isosceles triangle with base and height
+
+    double base = EditorConfig.distanceMarkerArrowBase * scaleInverse;
+    double halfBase = base / 2;
+
+    Offset arrowLeft = arrowBase + perpendicular * halfBase;
+    Offset arrowRight = arrowBase - perpendicular * halfBase;
+
+    Path arrowHead = Path()..addPolygon([head, arrowLeft, arrowRight], true);
+    canvas.drawPath(arrowHead, arrowPaint);
+  }
+
+  void drawArrowMarkers(Canvas canvas, Offset start, Offset end,
+      Offset perpendicular, String text) {
+    double offsetLength = EditorConfig.distanceMarkerArrowOffset * scaleInverse;
+
+    Offset arrowStart = start + perpendicular * offsetLength;
+    Offset arrowEnd = end + perpendicular * offsetLength;
+    Offset arrowMidpoint = (arrowStart + arrowEnd) / 2;
+
+    drawArrow(canvas, arrowStart, arrowMidpoint);
+    drawArrow(canvas, arrowEnd, arrowMidpoint);
+
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: Colors.grey.shade500,
+          fontSize: 12 * scaleInverse,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+    textPainter.paint(canvas,
+        arrowMidpoint - Offset(textPainter.width / 2, textPainter.height / 2));
+  }
+
+  void drawDistanceMarker(Canvas canvas, Offset start, Offset end) {
+    Offset delta = end - start;
+    double distance = delta.distance;
+    Offset normalized = delta / distance;
+    Offset perpendicular = Offset(normalized.dy, -normalized.dx);
+
+    drawDistanceEdgeMarker(canvas, start, perpendicular);
+    drawDistanceEdgeMarker(canvas, end, perpendicular);
+
+    drawArrowMarkers(
+        canvas, start, end, perpendicular, distance.toStringAsFixed(2));
+  }
+
+  void drawConfirmationMarker(Canvas canvas, Offset offset, Offset delta) {
     confirmationMarkerDrawn = true;
 
     Paint background = Paint()
@@ -247,16 +334,13 @@ class TfEditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double confirmationRadius =
-        TfEditorConfig.confirmationMarkerSize * scaleInverse;
+    double radius = EditorConfig.confirmationMarkerSize * scaleInverse;
 
-    Offset perpendicular = Offset(-direction.dy, direction.dx);
+    Offset perpendicular = Offset(-delta.dy, delta.dx);
     Offset center = offset +
-        perpendicular *
-            TfEditorConfig.confirmationMarkerDistance *
-            scaleInverse;
+        perpendicular * EditorConfig.confirmationMarkerDistance * scaleInverse;
 
-    editorData.confirmationRadius = confirmationRadius;
+    editorData.confirmationRadius = radius;
     editorData.confirmationMarker = center;
 
     bool isHovered = editorData.isActiveOnConfirmation!;
@@ -264,17 +348,15 @@ class TfEditorPainter extends CustomPainter {
 
     final Paint checkmarkPaint = Paint()
       ..color = isHovered ? Colors.white : Colors.green
-      ..strokeWidth = TfEditorConfig.checkmarkStrokeWidth * scaleInverse;
+      ..strokeWidth = EditorConfig.checkmarkStrokeWidth * scaleInverse;
 
-    Offset start =
-        center + TfEditorConfig.checkmarkStartBias * confirmationRadius;
-    Offset middle =
-        center + TfEditorConfig.checkmarkMiddleBias * confirmationRadius;
-    Offset end = center + TfEditorConfig.checkmarkEndBias * confirmationRadius;
+    Offset start = center + EditorConfig.checkmarkStartBias * radius;
+    Offset middle = center + EditorConfig.checkmarkMiddleBias * radius;
+    Offset end = center + EditorConfig.checkmarkEndBias * radius;
 
     highestLayer.add((Canvas canvas) {
-      canvas.drawCircle(center, confirmationRadius, background);
-      canvas.drawCircle(center, confirmationRadius, foreground);
+      canvas.drawCircle(center, radius, background);
+      canvas.drawCircle(center, radius, foreground);
 
       canvas.drawLine(start, middle, checkmarkPaint);
       canvas.drawCircle(middle, checkmarkPaint.strokeWidth / 2, checkmarkPaint);
@@ -296,12 +378,14 @@ class TfEditorPainter extends CustomPainter {
       Offset lastPoint = toolData.points[lastPointUuid]!;
       canvas.drawLine(lastPoint, activeEffectivePointer!, linePaint);
 
+      drawDistanceMarker(canvas, lastPoint, activeEffectivePointer!);
+
       if (actionPointQueue.length <= 1) return;
 
       String secondLastPointUuid = actionPointQueue.secondLast;
       Offset secondLastPoint = toolData.points[secondLastPointUuid]!;
-      Offset direction = lastPoint - secondLastPoint;
-      Offset normalized = direction / direction.distance;
+      Offset delta = lastPoint - secondLastPoint;
+      Offset normalized = delta / delta.distance;
 
       drawConfirmationMarker(canvas, lastPoint, normalized);
     }

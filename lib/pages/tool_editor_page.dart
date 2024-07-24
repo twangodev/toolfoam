@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toolfoam/models/tools/tf_tool.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';
-import 'package:toolfoam/widgets/editor/tf_editor.dart';
+import 'package:toolfoam/widgets/editor/editor.dart';
 
 class ToolEditorPage extends StatefulWidget {
   final TfTool tool;
@@ -39,7 +39,7 @@ class _ToolEditorPageState extends State<ToolEditorPage> {
         RenameableBreadcrumbItem(text: name, onRename: onRename)
       ])),
       body: Center(
-        child: TfEditor(tool: widget.tool),
+        child: Editor(tool: widget.tool),
       ),
     );
   }
