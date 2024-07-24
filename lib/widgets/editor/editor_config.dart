@@ -3,8 +3,9 @@ import 'dart:ui';
 import '../../models/editing_tool.dart';
 
 class EditorConfig {
-  static const minScale = 1e-6;
-  static const maxScale = 1e6;
+  static const scaleFactor = 2000.0;
+  static const minScale = 1 / scaleFactor;
+  static const maxScale = scaleFactor;
   static const frictionCoefficient =
       0.0; // TODO 0.0 set for stability, any other positive value leads to funky issue with sliding/no feasible callback updating pointer (experiences on trackpad)
 

@@ -158,8 +158,7 @@ class _EditorState extends State<Editor> {
                                           toggleGrid: gridToggleState,
                                           editingTool: activeEditingTool,
                                         ),
-                                        size: Size(constraints.maxWidth,
-                                            constraints.maxHeight),
+                                        size: Size(constraints.maxWidth, constraints.maxHeight),
                                       );
                                     });
                               })));

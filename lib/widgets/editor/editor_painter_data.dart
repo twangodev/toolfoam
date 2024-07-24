@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_path_data.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_logic.dart';
@@ -9,6 +10,8 @@ class EditorData extends ChangeNotifier {
   EditorData({
     required this.toolData,
   });
+
+  static final Logger logger = Logger('EditorData');
 
   void redraw() {
     notifyListeners();
@@ -19,6 +22,7 @@ class EditorData extends ChangeNotifier {
   double get scale => _scale;
   set scale(double value) {
     if (value == _scale) return;
+    logger.finest('Scaling update: $value, inverse: ${1 / value}, old: $_scale, ratio: ${value / _scale}');
     _scale = value;
     notifyListeners();
   }

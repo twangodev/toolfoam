@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
@@ -246,6 +247,10 @@ class EditorPainter extends CustomPainter {
     Offset start = offset + perpendicular * startLength;
     Offset end = offset + perpendicular * endLength;
 
+    if (!visibleRect.contains(start) && !visibleRect.contains(end)) {
+      return;
+    }
+
     canvas.drawLine(start, end, distancePaint);
   }
 
@@ -253,6 +258,10 @@ class EditorPainter extends CustomPainter {
     final Paint linePaint = Paint()
       ..color = Colors.grey.shade500
       ..strokeWidth = 0.5 * scaleInverse;
+
+    if (!visibleRect.contains(head) && !visibleRect.contains(end)) {
+      return;
+    }
 
     canvas.drawLine(head, end, linePaint);
 
@@ -292,15 +301,20 @@ class EditorPainter extends CustomPainter {
     drawArrow(canvas, arrowStart, arrowMidpoint);
     drawArrow(canvas, arrowEnd, arrowMidpoint);
 
-    final TextPainter textPainter = TextPainter(
+    if (!visibleRect.contains(arrowMidpoint)) {
+      return;
+    }
+
+    TextPainter textPainter = TextPainter(
       text: TextSpan(
         text: text,
         style: TextStyle(
           color: Colors.grey.shade500,
-          fontSize: 12 * scaleInverse,
+          fontSize: 12 ,
         ),
       ),
       textDirection: TextDirection.ltr,
+      textScaler: TextScaler.linear(scaleInverse),
     );
 
     textPainter.layout();
