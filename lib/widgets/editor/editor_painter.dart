@@ -405,24 +405,34 @@ class EditorPainter extends CustomPainter {
     }
   }
 
-  void renderDragPoint(Canvas canvas) {
-    if (editorData.dragPointUuid == null) return;
-    Offset? dragPoint = toolData.points[editorData.dragPointUuid!];
-    if (dragPoint == null) return;
-
-    final Paint dragPointPaint = Paint()
+  void renderPointActions(Canvas canvas) {
+    final Paint fill = Paint()
       ..color = Colors.blue
       ..strokeWidth = scaleInverse
       ..style = PaintingStyle.fill;
 
-    final Paint dragPointStroke = Paint()
+    final Paint stroke = Paint()
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
     double radius = EditorConfig.pointRadius * scaleInverse;
-    canvas.drawCircle(dragPoint, radius, dragPointPaint);
-    canvas.drawCircle(dragPoint, radius, dragPointStroke);
+
+    if (activePointer == null || editingTool != EditingTool.select) return;
+    bool isHover = toolData.points.containsValue(activeEffectivePointer!);
+    Offset? dragPoint = toolData.points[editorData.dragPointUuid];
+
+    Offset point;
+    if (dragPoint != null) {
+      point = dragPoint;
+    } else if (isHover) {
+      point = activeEffectivePointer!;
+    } else {
+      return;
+    }
+
+    canvas.drawCircle(point, radius, fill);
+    canvas.drawCircle(point, radius, stroke);
   }
 
   void drawHighestLayer(Canvas canvas) {
@@ -445,7 +455,7 @@ class EditorPainter extends CustomPainter {
 
     drawEditToolPreview(canvas);
     establishMarker(canvas);
-    renderDragPoint(canvas);
+    renderPointActions(canvas);
 
     drawHighestLayer(canvas);
 
