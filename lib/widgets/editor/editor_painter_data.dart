@@ -72,8 +72,10 @@ class EditorData extends ChangeNotifier {
     return shouldSnapToGrid(activePointer!);
   }
 
-  MapEntry<String, Offset>? nearestPointSnap(Offset offset) {
+  MapEntry<String, Offset>? nearestPointSnap(
+      Offset offset, String? ignoreUuid) {
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
+      if (entry.key == ignoreUuid) continue;
       if (EditorLogic.interceptsCircle(entry.value, offset,
           EditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
         return entry;
@@ -83,8 +85,8 @@ class EditorData extends ChangeNotifier {
     return null;
   }
 
-  Offset effectivePointerCoordinates(Offset offset) {
-    MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset);
+  Offset effectivePointerCoordinates(Offset offset, {String? ignoreUuid}) {
+    MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset, ignoreUuid);
     if (pointSnap != null) return pointSnap.value;
     if (shouldSnapToGrid(offset)) return gridSnap(offset);
 
@@ -111,5 +113,13 @@ class EditorData extends ChangeNotifier {
   bool? get isActiveOnConfirmation {
     if (activePointer == null) return null;
     return shouldConfirm(activePointer!);
+  }
+
+  String? _dragPointUuid;
+  String? get dragPointUuid => _dragPointUuid;
+  set dragPointUuid(String? value) {
+    if (value == _dragPointUuid) return;
+    _dragPointUuid = value;
+    notifyListeners();
   }
 }

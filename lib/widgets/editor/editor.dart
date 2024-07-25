@@ -53,12 +53,35 @@ class _EditorState extends State<Editor> {
     });
   }
 
+  void updatePointer(PointerEvent event) {
+    Offset scenePointer = transformationController.toScene(event.localPosition);
+    notifier.activePointer = scenePointer;
+
+    if (notifier.dragPointUuid != null) {
+      String dragPoint = notifier.dragPointUuid!;
+      notifier.toolData.points[dragPoint] = notifier
+          .effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
+    }
+  }
+
   void onPointerDown(PointerDownEvent event) {
-    logger.finer('Pointer down event: $event');
+    updatePointer(event);
+
     if (activeEditingTool == EditingTool.pan) return;
     Offset scenePointer = transformationController.toScene(event.localPosition);
     Offset effectivePointer =
         notifier.effectivePointerCoordinates(scenePointer);
+
+    logger
+        .finer('Pointer down at: $scenePointer, effective: $effectivePointer');
+
+    if (activeEditingTool == EditingTool.select) {
+      String? pointUuid = notifier.toolData.points.inverse[effectivePointer];
+      if (pointUuid != null) {
+        notifier.dragPointUuid = pointUuid;
+      }
+      return;
+    }
 
     if (activeEditingTool == EditingTool.line) {
       if (notifier.shouldConfirm(scenePointer)) {
@@ -80,13 +103,15 @@ class _EditorState extends State<Editor> {
         toolData.addLine(line);
       }
 
+      notifier.redraw();
       return;
     }
   }
 
-  void updatePointer(PointerEvent event) {
-    notifier.activePointer =
-        transformationController.toScene(event.localPosition);
+  void onPointerUp(PointerUpEvent event) {
+    updatePointer(event);
+
+    notifier.dragPointUuid = null;
   }
 
   @override
@@ -125,6 +150,7 @@ class _EditorState extends State<Editor> {
                       Size(constraints.maxWidth, constraints.maxHeight);
                   return Listener(
                       onPointerDown: onPointerDown,
+                      onPointerUp: onPointerUp,
                       onPointerMove: updatePointer,
                       onPointerHover: updatePointer,
                       onPointerPanZoomStart: updatePointer,

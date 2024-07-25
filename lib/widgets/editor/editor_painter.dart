@@ -205,21 +205,21 @@ class EditorPainter extends CustomPainter {
   }
 
   void drawPoints(Canvas canvas) {
-    final Paint fillPaint = Paint()
+    final Paint defaultFillPaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.fill;
 
-    final Paint strokePaint = Paint()
+    final Paint defaultStrokePaint = Paint()
       ..color = Colors.grey.shade900
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
     for (Offset point in toolData.points.values) {
-      canvas.drawCircle(
-          point, EditorConfig.pointRadius * scaleInverse, fillPaint);
-      canvas.drawCircle(
-          point, EditorConfig.pointRadius * scaleInverse, strokePaint);
+      double radius = EditorConfig.pointRadius * scaleInverse;
+
+      canvas.drawCircle(point, radius, defaultFillPaint);
+      canvas.drawCircle(point, radius, defaultStrokePaint);
     }
   }
 
@@ -405,6 +405,26 @@ class EditorPainter extends CustomPainter {
     }
   }
 
+  void renderDragPoint(Canvas canvas) {
+    if (editorData.dragPointUuid == null) return;
+    Offset? dragPoint = toolData.points[editorData.dragPointUuid!];
+    if (dragPoint == null) return;
+
+    final Paint dragPointPaint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = scaleInverse
+      ..style = PaintingStyle.fill;
+
+    final Paint dragPointStroke = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2 * scaleInverse
+      ..style = PaintingStyle.stroke;
+
+    double radius = EditorConfig.pointRadius * scaleInverse;
+    canvas.drawCircle(dragPoint, radius, dragPointPaint);
+    canvas.drawCircle(dragPoint, radius, dragPointStroke);
+  }
+
   void drawHighestLayer(Canvas canvas) {
     while (highestLayer.isNotEmpty) {
       Function(Canvas) function = highestLayer.removeFirst();
@@ -425,6 +445,7 @@ class EditorPainter extends CustomPainter {
 
     drawEditToolPreview(canvas);
     establishMarker(canvas);
+    renderDragPoint(canvas);
 
     drawHighestLayer(canvas);
 
