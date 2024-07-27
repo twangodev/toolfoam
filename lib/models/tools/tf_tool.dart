@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:toolfoam/models/tools/tf_path_data.dart';
+import 'package:toolfoam/models/tools/tf_tool_data.dart';
 import 'package:toolfoam/models/tools/tf_tool_metadata.dart';
 import 'package:path/path.dart' as p;
 

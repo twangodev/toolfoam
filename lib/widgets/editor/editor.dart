@@ -12,7 +12,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../../models/editing_tool.dart';
 import '../../models/line.dart';
-import '../../models/tools/tf_path_data.dart';
+import '../../models/tools/tf_tool_data.dart';
 
 class Editor extends StatefulWidget {
   final TfTool tool;
@@ -26,10 +26,9 @@ class Editor extends StatefulWidget {
 class _EditorState extends State<Editor> {
   static final logger = Logger('TFEditorState');
 
-  final TransformationController transformationController =
-      TransformationController();
+  final transformationController = TransformationController();
 
-  late final EditorData notifier = EditorData(toolData: widget.tool.data);
+  late final notifier = EditorData(toolData: widget.tool.data);
 
   Size viewerSize = Size.zero;
   bool allowPrimaryMouseButtonPan = false;
@@ -59,8 +58,19 @@ class _EditorState extends State<Editor> {
 
     if (notifier.dragPointUuid != null) {
       String dragPoint = notifier.dragPointUuid!;
-      notifier.toolData.points[dragPoint] = notifier
-          .effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
+
+      Offset effectivePointer =
+          notifier.effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
+
+      String? existingPoint = notifier.toolData.points.inverse[effectivePointer];
+      if (existingPoint != null && existingPoint != dragPoint) {
+        // TODO temporary point deletion (snaps to existing point)
+        return;
+      } else if (existingPoint == null) {
+        // TODO point reinsertion
+      }
+
+      notifier.toolData.points[dragPoint] = effectivePointer;
     }
   }
 
@@ -72,8 +82,7 @@ class _EditorState extends State<Editor> {
     Offset effectivePointer =
         notifier.effectivePointerCoordinates(scenePointer);
 
-    logger
-        .finer('Pointer down at: $scenePointer, effective: $effectivePointer');
+    logger.finer('Pointer down at: $effectivePointer');
 
     if (activeEditingTool == EditingTool.select) {
       String? pointUuid = notifier.toolData.points.inverse[effectivePointer];

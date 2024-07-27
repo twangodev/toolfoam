@@ -9,7 +9,7 @@ import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import '../../models/line.dart';
-import '../../models/tools/tf_path_data.dart';
+import '../../models/tools/tf_tool_data.dart';
 
 class EditorPainter extends CustomPainter {
   final Quad viewport;

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:toolfoam/models/tools/tf_path_data.dart';
+import 'package:toolfoam/models/tools/tf_tool_data.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_util.dart';
 
