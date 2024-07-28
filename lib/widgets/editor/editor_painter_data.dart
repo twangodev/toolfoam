@@ -74,7 +74,6 @@ class EditorData extends ChangeNotifier {
 
   MapEntry<String, Offset>? nearestPointSnap(
       Offset offset, String? ignoreUuid) {
-
     MapEntry<String, Offset>? nearestPointSnap = null;
     double nearestDistance = double.infinity;
     for (MapEntry<String, Offset> entry in toolData.points.entries) {

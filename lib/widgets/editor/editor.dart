@@ -59,10 +59,11 @@ class _EditorState extends State<Editor> {
     if (notifier.dragPointUuid != null) {
       String dragPoint = notifier.dragPointUuid!;
 
-      Offset effectivePointer =
-          notifier.effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
+      Offset effectivePointer = notifier
+          .effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
 
-      String? existingPoint = notifier.toolData.points.inverse[effectivePointer];
+      String? existingPoint =
+          notifier.toolData.points.inverse[effectivePointer];
       if (existingPoint != null && existingPoint != dragPoint) {
         // TODO temporary point deletion (snaps to existing point)
         return;
