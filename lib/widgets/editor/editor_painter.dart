@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
 import 'package:toolfoam/models/editing_tool.dart';
@@ -17,6 +17,7 @@ class EditorPainter extends CustomPainter {
   final EditorData editorData;
   final EditingTool editingTool;
   final Queue<Function(Canvas)> highestLayer = Queue();
+  final bool debug;
 
   static const Offset origin = Offset(0, 0);
 
@@ -25,6 +26,7 @@ class EditorPainter extends CustomPainter {
     required this.editorData,
     required this.toggleGrid,
     required this.editingTool,
+    this.debug = kDebugMode,
   });
 
   late final visibleRect = Rect.fromLTRB(
@@ -405,7 +407,7 @@ class EditorPainter extends CustomPainter {
     }
   }
 
-  void renderPointActions(Canvas canvas) {
+  void renderActions(Canvas canvas) {
     final Paint fill = Paint()
       ..color = Colors.blue
       ..strokeWidth = scaleInverse
@@ -455,7 +457,7 @@ class EditorPainter extends CustomPainter {
 
     drawEditToolPreview(canvas);
     establishMarker(canvas);
-    renderPointActions(canvas);
+    renderActions(canvas);
 
     drawHighestLayer(canvas);
 
