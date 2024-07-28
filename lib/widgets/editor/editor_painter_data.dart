@@ -74,15 +74,27 @@ class EditorData extends ChangeNotifier {
 
   MapEntry<String, Offset>? nearestPointSnap(
       Offset offset, String? ignoreUuid) {
+
+    MapEntry<String, Offset>? nearestPointSnap = null;
+    double nearestDistance = double.infinity;
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
       if (entry.key == ignoreUuid) continue;
-      if (EditorLogic.interceptsCircle(entry.value, offset,
-          EditorConfig.defaultSnapTolerance / 2 * scaleInverse)) {
-        return entry;
+
+      Offset point = entry.value;
+      Offset delta = point - offset;
+      double distance = delta.distanceSquared;
+
+      bool isNearest = distance < nearestDistance;
+      bool isSnap = EditorLogic.interceptsCircle(entry.value, offset,
+          EditorConfig.defaultSnapTolerance / 2 * scaleInverse);
+
+      if (isNearest && isSnap) {
+        nearestPointSnap = entry;
+        nearestDistance = distance;
       }
     }
 
-    return null;
+    return nearestPointSnap;
   }
 
   Offset effectivePointerCoordinates(Offset offset, {String? ignoreUuid}) {
