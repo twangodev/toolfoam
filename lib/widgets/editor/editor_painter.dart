@@ -187,6 +187,20 @@ class EditorPainter extends CustomPainter {
     canvas.drawRect(rect, snapPaint);
   }
 
+  void drawCrossXMarker(Canvas canvas, Offset offset) {
+    final Paint crossPaint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 1.5 * scaleInverse
+      ..style = PaintingStyle.stroke;
+
+    double halfSize = EditorConfig.crossXMarkerSize * scaleInverse / 2;
+
+    canvas.drawLine(offset.translate(-halfSize, -halfSize),
+        offset.translate(halfSize, halfSize), crossPaint);
+    canvas.drawLine(offset.translate(-halfSize, halfSize),
+        offset.translate(halfSize, -halfSize), crossPaint);
+  }
+
   void establishGridSnap(Canvas canvas) {
     if (activeShouldSnapToGrid!) {
       drawSnapMarker(canvas, activePointerGridSnap!);
@@ -200,6 +214,12 @@ class EditorPainter extends CustomPainter {
     if (!editingTool.allowsMarker || activePointer == null) return;
     if (toolData.points.values.contains(activeEffectivePointer!)) {
       drawSnapMarker(canvas, activeEffectivePointer!);
+      return;
+    }
+
+    Offset? nearestLineSnap = editorData.nearestLineSnap(activePointer!);
+    if (nearestLineSnap != null) {
+      drawCrossXMarker(canvas, nearestLineSnap);
       return;
     }
 

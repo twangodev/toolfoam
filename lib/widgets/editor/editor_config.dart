@@ -23,6 +23,7 @@ class EditorConfig {
   // Painter Configuration
 
   static const crossMarkerSize = 25.0;
+  static const crossXMarkerSize = 15.0;
 
   static const minorGridSize = 20.0;
   static const majorGridDensity = 5; // 100.0 is the majorGridSize

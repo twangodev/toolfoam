@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tools/tf_tool_data.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
-import 'package:toolfoam/widgets/editor/editor_util.dart';
+
+import '../../models/line.dart';
+import 'editor_logic.dart';
 
 class EditorData extends ChangeNotifier {
   EditorData({
@@ -72,9 +74,35 @@ class EditorData extends ChangeNotifier {
     return shouldSnapToGrid(activePointer!);
   }
 
+  Offset? nearestLineSnap(Offset offset, {String? ignoreUuid}) {
+    Offset? nearestLineSnap;
+    double nearestDistance = double.infinity;
+    for (Line line in toolData.lines) {
+      if (line.point1 == ignoreUuid || line.point2 == ignoreUuid) continue;
+
+      Offset start = toolData.points[line.point1]!;
+      Offset end = toolData.points[line.point2]!;
+
+      Offset nearestPoint = EditorLogic.nearestPointOnLine(start, end, offset);
+      Offset delta = nearestPoint - offset;
+      double distance = delta.distanceSquared;
+
+      bool isNearest = distance < nearestDistance;
+      double threshold = EditorConfig.defaultSnapTolerance / 2 * scaleInverse;
+      bool isSnap = distance < threshold * threshold;
+
+      if (isNearest && isSnap) {
+        nearestLineSnap = nearestPoint;
+        nearestDistance = distance;
+      }
+    }
+
+    return nearestLineSnap;
+  }
+
   MapEntry<String, Offset>? nearestPointSnap(
       Offset offset, String? ignoreUuid) {
-    MapEntry<String, Offset>? nearestPointSnap = null;
+    MapEntry<String, Offset>? nearestPointSnap;
     double nearestDistance = double.infinity;
     for (MapEntry<String, Offset> entry in toolData.points.entries) {
       if (entry.key == ignoreUuid) continue;
@@ -99,6 +127,10 @@ class EditorData extends ChangeNotifier {
   Offset effectivePointerCoordinates(Offset offset, {String? ignoreUuid}) {
     MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset, ignoreUuid);
     if (pointSnap != null) return pointSnap.value;
+
+    Offset? lineSnap = nearestLineSnap(offset);
+    if (lineSnap != null) return lineSnap;
+
     if (shouldSnapToGrid(offset)) return gridSnap(offset);
 
     return offset;
