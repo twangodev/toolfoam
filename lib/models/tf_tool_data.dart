@@ -1,9 +1,5 @@
-import 'dart:collection';
-
-import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/models/fixed_point_data.dart';
 import 'package:toolfoam/models/line_data.dart';
-import 'package:toolfoam/models/tf_id.dart';
 
 import 'json_serializable.dart';
 
