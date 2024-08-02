@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:toolfoam/models/tools/tf_tool.dart';
+import 'package:toolfoam/models/tf_id.dart';
+import 'package:toolfoam/models/tf_tool.dart';
 
 import '../data/organization_structure_data.dart';
 import '../utilities/storage_file_system_util.dart';
@@ -10,7 +11,7 @@ import 'entity.dart';
 import 'metadata.dart';
 
 class TfCollection extends Entity {
-  TfCollection({required super.uuid});
+  TfCollection({required super.id});
 
   static Future<Directory> _getCollectionsDirectory() async {
     return StorageFileSystemUtil.buildDirectory(
@@ -20,7 +21,7 @@ class TfCollection extends Entity {
 
   Future<Directory> _getCollection() async {
     return StorageFileSystemUtil.buildDirectory(
-        await _getCollectionsDirectory(), uuid);
+        await _getCollectionsDirectory(), id.toString());
   }
 
   Future<Directory> _buildDirectoryFromCollection(String path) async {
@@ -35,9 +36,10 @@ class TfCollection extends Entity {
     }
     List<Directory> collections =
         await StorageFileSystemUtil.list<Directory>(collectionsDirectory);
-    return collections
-        .map((dir) => TfCollection(uuid: p.basenameWithoutExtension(dir.path)))
-        .toList();
+    return collections.map((dir) {
+      TfId id = TfId(p.basenameWithoutExtension(dir.path));
+      return TfCollection(id: id);
+    }).toList();
   }
 
   Future<Directory> getToolsDirectory() async {
@@ -103,8 +105,7 @@ class TfCollection extends Entity {
       Map<String, dynamic> json = jsonDecode(rawJson);
       return Metadata.fromJson(json);
     } else {
-      return _initMetadata(
-          uuid); // Weird case where directory exists without metadata? TODO documentation or throw some weird error
+      return _initMetadata(id.toString());
     }
   }
 
@@ -127,12 +128,12 @@ class TfCollection extends Entity {
   @override
   bool operator ==(Object other) {
     if (other is TfCollection) {
-      return uuid == other.uuid;
+      return id == other.id;
     } else {
       return false;
     }
   }
 
   @override
-  int get hashCode => uuid.hashCode;
+  int get hashCode => id.hashCode;
 }

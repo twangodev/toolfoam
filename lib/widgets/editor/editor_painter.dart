@@ -3,13 +3,16 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
+import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
-import '../../models/line.dart';
-import '../../models/tools/tf_tool_data.dart';
+import '../../geometry/line.dart';
+import '../../models/snap.dart';
+import '../../models/tf_id.dart';
+import '../../models/tf_tool_data.dart';
 
 class EditorPainter extends CustomPainter {
   final Quad viewport;
@@ -42,11 +45,9 @@ class EditorPainter extends CustomPainter {
   late final int gridRatio = editorData.gridRatio;
   late final double gridSize = editorData.gridSize;
   late final Offset? activePointer = editorData.activePointer;
-  late final Offset? activePointerGridSnap = editorData.activePointerGridSnap;
-  late final Offset? activeEffectivePointer = editorData.activeEffectivePointer;
-  late final bool? activeShouldSnapToGrid = editorData.activeShouldSnapToGrid;
+  late final Snap? snap = editorData.snap;
   late final TfToolData toolData = editorData.toolData;
-  late final actionPointQueue = editorData.actionPointerStack;
+  late final actionPointerStack = editorData.actionPointerStack;
 
   bool confirmationMarkerDrawn = false;
 
@@ -133,10 +134,11 @@ class EditorPainter extends CustomPainter {
 
     if (!toggleGrid) return;
 
+    int top = scaledVisibleRect.top.toInt();
+    int bottom = scaledVisibleRect.bottom.toInt();
+
     // Drawing horizontal lines
-    for (int i = scaledVisibleRect.top.toInt();
-        i <= scaledVisibleRect.bottom.toInt();
-        i++) {
+    for (int i = top; i <= bottom; i++) {
       double y = i * gridSize;
       if (y == 0) continue;
       Paint selectedPaint =
@@ -145,10 +147,11 @@ class EditorPainter extends CustomPainter {
           selectedPaint);
     }
 
+    int left = scaledVisibleRect.left.toInt();
+    int right = scaledVisibleRect.right.toInt();
+
     // Drawing vertical lines
-    for (int i = scaledVisibleRect.left.toInt();
-        i <= scaledVisibleRect.right.toInt();
-        i++) {
+    for (int i = left; i <= right; i++) {
       double x = i * gridSize;
       if (x == 0) continue;
       Paint selectedPaint =
@@ -201,29 +204,30 @@ class EditorPainter extends CustomPainter {
         offset.translate(halfSize, -halfSize), crossPaint);
   }
 
-  void establishGridSnap(Canvas canvas) {
-    if (activeShouldSnapToGrid!) {
-      drawSnapMarker(canvas, activePointerGridSnap!);
-      drawCrossMarker(canvas, activePointerGridSnap!);
-    } else {
-      drawCrossMarker(canvas, activePointer!);
-    }
+  void drawGridSnap(Canvas canvas, Offset offset) {
+    drawSnapMarker(canvas, offset);
+    drawCrossMarker(canvas, offset);
   }
 
   void establishMarker(Canvas canvas) {
-    if (!editingTool.allowsMarker || activePointer == null) return;
-    if (toolData.points.values.contains(activeEffectivePointer!)) {
-      drawSnapMarker(canvas, activeEffectivePointer!);
+    Offset? pointer = activePointer;
+    if (!editingTool.allowsMarker || pointer == null) return;
+
+    Snap? currentSnap = snap;
+
+    if (currentSnap == null) {
+      drawCrossMarker(canvas, pointer);
       return;
     }
 
-    Offset? nearestLineSnap = editorData.nearestLineSnap(activePointer!);
-    if (nearestLineSnap != null) {
-      drawCrossXMarker(canvas, nearestLineSnap);
-      return;
+    switch (currentSnap.target) {
+      case SnapTarget.point:
+        drawSnapMarker(canvas, currentSnap.point);
+      case SnapTarget.line:
+        drawCrossXMarker(canvas, currentSnap.point);
+      case SnapTarget.grid:
+        drawGridSnap(canvas, currentSnap.point);
     }
-
-    establishGridSnap(canvas);
   }
 
   void drawPoints(Canvas canvas) {
@@ -237,11 +241,11 @@ class EditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    for (Offset point in toolData.points.values) {
-      double radius = EditorConfig.pointRadius * scaleInverse;
-
-      canvas.drawCircle(point, radius, defaultFillPaint);
-      canvas.drawCircle(point, radius, defaultStrokePaint);
+    double radius = EditorConfig.pointRadius * scaleInverse;
+    for (FixedPoint point in toolData.fixedPoints.values) {
+      Offset offset = point.toOffset();
+      canvas.drawCircle(offset, radius, defaultFillPaint);
+      canvas.drawCircle(offset, radius, defaultStrokePaint);
     }
   }
 
@@ -250,9 +254,9 @@ class EditorPainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse;
 
-    for (Line line in toolData.lines) {
-      Offset start = toolData.points[line.point1]!;
-      Offset end = toolData.points[line.point2]!;
+    for (Line line in toolData.lines.values) {
+      Offset start = toolData.fixedPoints[line.a]!.toOffset();
+      Offset end = toolData.fixedPoints[line.b]!.toOffset();
       canvas.drawLine(start, end, linePaint);
     }
   }
@@ -370,7 +374,7 @@ class EditorPainter extends CustomPainter {
       ..strokeWidth = 2 * scaleInverse
       ..style = PaintingStyle.stroke;
 
-    double radius = EditorConfig.confirmationMarkerSize * scaleInverse;
+    double radius = EditorConfig.confirmationMarkerRadius * scaleInverse;
 
     Offset perpendicular = Offset(-delta.dy, delta.dx);
     Offset center = offset +
@@ -404,22 +408,24 @@ class EditorPainter extends CustomPainter {
     if (activePointer == null) return;
 
     if (editingTool == EditingTool.line) {
-      if (actionPointQueue.isEmpty) return;
+      if (actionPointerStack.isEmpty) return;
 
       final Paint linePaint = Paint()
         ..color = Colors.white
         ..strokeWidth = 2 * scaleInverse;
 
-      String lastPointUuid = actionPointQueue.last;
-      Offset lastPoint = toolData.points[lastPointUuid]!;
-      canvas.drawLine(lastPoint, activeEffectivePointer!, linePaint);
+      TfId lastPointUuid = actionPointerStack.last;
+      Offset lastPoint = toolData.fixedPoints[lastPointUuid]!.toOffset();
+      Offset point = snap?.point ?? activePointer!;
+      canvas.drawLine(lastPoint, point, linePaint);
 
-      drawDistanceMarker(canvas, lastPoint, activeEffectivePointer!);
+      drawDistanceMarker(canvas, lastPoint, point);
 
-      if (actionPointQueue.length <= 1) return;
+      if (actionPointerStack.length <= 1) return;
 
-      String secondLastPointUuid = actionPointQueue.secondLast;
-      Offset secondLastPoint = toolData.points[secondLastPointUuid]!;
+      TfId secondLastPointUuid = actionPointerStack.secondLast;
+      Offset secondLastPoint =
+          toolData.fixedPoints[secondLastPointUuid]!.toOffset();
       Offset delta = lastPoint - secondLastPoint;
       Offset normalized = delta / delta.distance;
 
@@ -441,14 +447,17 @@ class EditorPainter extends CustomPainter {
     double radius = EditorConfig.pointRadius * scaleInverse;
 
     if (activePointer == null || editingTool != EditingTool.select) return;
-    bool isHover = toolData.points.containsValue(activeEffectivePointer!);
-    Offset? dragPoint = toolData.points[editorData.dragPointUuid];
+    bool isHover = toolData.fixedPoints
+        .containsValue(FixedPoint.fromOffset(snap?.point ?? activePointer!));
+    Offset? dragPoint = toolData
+        .fixedPoints[editorData.dragPointUuid ?? TfId.unique()]
+        ?.toOffset(); // todo fix this madness
 
     Offset point;
     if (dragPoint != null) {
       point = dragPoint;
     } else if (isHover) {
-      point = activeEffectivePointer!;
+      point = snap!.point;
     } else {
       return;
     }

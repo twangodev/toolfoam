@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:toolfoam/models/tools/tf_tool_data.dart';
-import 'package:toolfoam/models/tools/tf_tool_metadata.dart';
 import 'package:path/path.dart' as p;
+import 'package:toolfoam/models/tf_id.dart';
+import 'package:toolfoam/models/tf_tool_data.dart';
+import 'package:toolfoam/models/tf_tool_metadata.dart';
 
-import '../../data/organization_structure_data.dart';
-import '../../utilities/storage_file_system_util.dart';
-import '../entity.dart';
-import '../json_serializable.dart';
-import '../tf_collection.dart';
+import '../data/organization_structure_data.dart';
+import '../utilities/storage_file_system_util.dart';
+import 'entity.dart';
+import 'json_serializable.dart';
+import 'tf_collection.dart';
 
 class TfTool extends DiskIOEntity implements JsonSerializable {
   static final Logger logger = Logger('TfTool');
@@ -19,16 +20,18 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   TfCollection owner;
   TfToolData data = TfToolData();
 
-  TfTool({required super.uuid, required this.owner});
+  TfTool({required super.id, required this.owner});
 
-  TfTool.fromJson(Map<String, dynamic> json, String uuid, this.owner)
+  TfTool.fromJson(Map<String, dynamic> json, TfId id, this.owner)
       : metadata = TfToolMetadata.fromJson(json['metadata']),
-        super(uuid: uuid);
+        super(id: id);
 
   static Future<TfTool> fromFile(File file, TfCollection owner) async {
     String rawJson = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> json = jsonDecode(rawJson);
-    return TfTool.fromJson(json, p.basenameWithoutExtension(file.path), owner);
+    String name = p.basenameWithoutExtension(file.path);
+    TfId id = TfId(name);
+    return TfTool.fromJson(json, id, owner);
   }
 
   static Future<List<TfTool>> fromFiles(
@@ -45,10 +48,10 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
       };
 
   Future<File> _getFile() async {
-    return StorageFileSystemUtil.buildFileWithExtension(
-        await owner.getToolsDirectory(),
-        uuid,
-        OrganizationStructureData.toolExtension);
+    Directory dir = await owner.getToolsDirectory();
+    String name = id.toString();
+    String ext = OrganizationStructureData.toolExtension;
+    return StorageFileSystemUtil.buildFileWithExtension(dir, name, ext);
   }
 
   @override
@@ -70,7 +73,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     File file = await _getFile();
     String json = await StorageFileSystemUtil.readFromFile(file);
     Map<String, dynamic> jsonMap = jsonDecode(json);
-    TfTool diskTool = TfTool.fromJson(jsonMap, uuid, owner);
+    TfTool diskTool = TfTool.fromJson(jsonMap, id, owner);
 
     copy(diskTool);
   }

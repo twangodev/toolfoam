@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:toolfoam/models/tf_id.dart';
 import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.dart';
 
-import '../../models/entity.dart';
 import '../../models/metadata.dart';
 import '../../models/tf_collection.dart';
 
@@ -29,7 +29,7 @@ class _CollectionManagerDialogState extends State<CollectionManagerDialog> {
   }
 
   void _createCollection() async {
-    TfCollection tfc = TfCollection(uuid: Entity.uuidGenerator.v4());
+    TfCollection tfc = TfCollection(id: TfId.unique());
     await tfc.create(_searchController.text);
 
     _searchController.clear();

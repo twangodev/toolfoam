@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:toolfoam/models/tools/tf_tool.dart';
+import 'package:toolfoam/models/tf_tool.dart';
 import 'package:toolfoam/widgets/text/tooltip_date/tooltip_relative_date_text.dart';
 
 class ToolDetailsDialog extends StatelessWidget {

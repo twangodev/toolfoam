@@ -1,11 +1,13 @@
-import 'package:uuid/uuid.dart';
+import 'package:toolfoam/models/tf_id.dart';
 
-abstract class Entity {
-  static const uuidGenerator = Uuid();
+abstract class Identifiable {
+  final TfId id;
 
-  final String uuid;
+  Identifiable({required this.id});
+}
 
-  Entity({required this.uuid});
+abstract class Entity extends Identifiable {
+  Entity({required super.id});
 
   Future<void> create(String name);
   Future<bool> exists();
@@ -13,7 +15,7 @@ abstract class Entity {
 }
 
 abstract class DiskIOEntity extends Entity {
-  DiskIOEntity({required super.uuid});
+  DiskIOEntity({required super.id});
 
   Future<void> push();
   Future<void> pull();

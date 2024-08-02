@@ -3,13 +3,13 @@ import 'dart:ui';
 import 'package:vector_math/vector_math_64.dart';
 
 class EditorLogic {
-  static bool interceptsSquare(Offset parent, Offset child, double size) {
-    Rect rect = Rect.fromCenter(center: parent, width: size, height: size);
-    return rect.contains(child);
+  static bool interceptsSquare(Offset center, Offset offset, double size) {
+    Rect rect = Rect.fromCenter(center: center, width: size, height: size);
+    return rect.contains(offset);
   }
 
-  static bool interceptsCircle(Offset parent, Offset child, double radius) {
-    double distance = (parent - child).distanceSquared;
+  static bool interceptsCircle(Offset center, Offset offset, double radius) {
+    double distance = (center - offset).distanceSquared;
     return distance < radius * radius;
   }
 

@@ -1,5 +1,5 @@
-import '../../utilities/date_time_extensions_util.dart';
-import '../metadata.dart';
+import '../utilities/date_time_extensions_util.dart';
+import 'metadata.dart';
 
 class TfToolMetadata extends Metadata {
   String? type;

@@ -1,8 +1,12 @@
+import 'dart:collection';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:toolfoam/models/tools/tf_tool.dart';
 import 'package:toolfoam/extensions/list_extensions.dart';
+import 'package:toolfoam/geometry/point.dart';
+import 'package:toolfoam/models/tf_id.dart';
+import 'package:toolfoam/models/tf_tool.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_interactive_viewer.dart';
 import 'package:toolfoam/widgets/editor/editor_painter.dart';
@@ -10,9 +14,9 @@ import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:toolfoam/widgets/editor/editor_toolbar.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../geometry/line.dart';
 import '../../models/editing_tool.dart';
-import '../../models/line.dart';
-import '../../models/tools/tf_tool_data.dart';
+import '../../models/tf_tool_data.dart';
 
 class Editor extends StatefulWidget {
   final TfTool tool;
@@ -28,8 +32,6 @@ class _EditorState extends State<Editor> {
 
   final transformationController = TransformationController();
 
-  late final notifier = EditorData(toolData: widget.tool.data);
-
   Size viewerSize = Size.zero;
   bool allowPrimaryMouseButtonPan = false;
   bool initialMove = false;
@@ -38,6 +40,9 @@ class _EditorState extends State<Editor> {
   EditingTool activeEditingTool = EditorConfig.defaultTool;
   List<String> actionPointBuffer = [];
 
+  late final data = EditorData(
+      toolData: widget.tool.data, gridToggleState: () => gridToggleState);
+
   void toggleGrid(bool newState) {
     setState(() {
       gridToggleState = newState;
@@ -45,7 +50,7 @@ class _EditorState extends State<Editor> {
   }
 
   void setTool(EditingTool tool) {
-    notifier.actionPointerStack.clear();
+    data.actionPointerStack.clear();
     setState(() {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
@@ -54,16 +59,18 @@ class _EditorState extends State<Editor> {
 
   void updatePointer(PointerEvent event) {
     Offset scenePointer = transformationController.toScene(event.localPosition);
-    notifier.activePointer = scenePointer;
+    data.activePointer = scenePointer;
 
-    if (notifier.dragPointUuid != null) {
-      String dragPoint = notifier.dragPointUuid!;
+    if (data.dragPointUuid != null) {
+      TfId dragPoint = data.dragPointUuid!;
 
-      Offset effectivePointer = notifier
-          .effectivePointerCoordinates(scenePointer, ignoreUuid: dragPoint);
+      Set<TfId> ignore = {dragPoint};
+      ignore.addAll(data.toolData.lines.dependsOn(dragPoint));
+      Offset effectivePointer = data.nearestSnap(scenePointer, ignore)?.point ??
+          scenePointer; // TODO fix this madness
 
-      String? existingPoint =
-          notifier.toolData.points.inverse[effectivePointer];
+      TfId? existingPoint = data.toolData.fixedPoints
+          .getId(FixedPoint.fromOffset(effectivePointer));
       if (existingPoint != null && existingPoint != dragPoint) {
         // TODO temporary point deletion (snaps to existing point)
         return;
@@ -71,7 +78,8 @@ class _EditorState extends State<Editor> {
         // TODO point reinsertion
       }
 
-      notifier.toolData.points[dragPoint] = effectivePointer;
+      data.toolData.fixedPoints[dragPoint] =
+          FixedPoint.fromOffset(effectivePointer);
     }
   }
 
@@ -80,40 +88,41 @@ class _EditorState extends State<Editor> {
 
     if (activeEditingTool == EditingTool.pan) return;
     Offset scenePointer = transformationController.toScene(event.localPosition);
-    Offset effectivePointer =
-        notifier.effectivePointerCoordinates(scenePointer);
+    Offset effectivePointer = data.snap?.point ?? scenePointer;
 
     logger.finer('Pointer down at: $effectivePointer');
 
     if (activeEditingTool == EditingTool.select) {
-      String? pointUuid = notifier.toolData.points.inverse[effectivePointer];
+      TfId? pointUuid = data.toolData.fixedPoints
+          .getId(FixedPoint.fromOffset(effectivePointer));
       if (pointUuid != null) {
-        notifier.dragPointUuid = pointUuid;
+        data.dragPointUuid = pointUuid;
       }
       return;
     }
 
     if (activeEditingTool == EditingTool.line) {
-      if (notifier.shouldConfirm(scenePointer)) {
+      if (data.shouldConfirm(scenePointer)) {
         logger.finer('Confirming line, clearing action stack');
-        notifier.actionPointerStack.clear();
-        notifier.redraw();
+        data.actionPointerStack.clear();
+        data.redraw();
         return;
       }
 
-      TfToolData toolData = notifier.toolData;
-      String pointUuid = toolData.addPoint(effectivePointer);
-      notifier.actionPointerStack.add(pointUuid);
+      TfToolData toolData = data.toolData;
+      TfId pointId =
+          toolData.fixedPoints.add(FixedPoint.fromOffset(effectivePointer));
+      data.actionPointerStack.add(pointId);
 
-      if (notifier.actionPointerStack.length >= 2) {
-        String startUuid = notifier.actionPointerStack.secondLast;
-        String endUuid = notifier.actionPointerStack.last;
+      if (data.actionPointerStack.length >= 2) {
+        TfId start = data.actionPointerStack.secondLast;
+        TfId end = data.actionPointerStack.last;
 
-        Line line = Line(startUuid, endUuid);
-        toolData.addLine(line);
+        Line line = Line(start, end);
+        toolData.lines.add(line);
       }
 
-      notifier.redraw();
+      data.redraw();
       return;
     }
   }
@@ -121,7 +130,7 @@ class _EditorState extends State<Editor> {
   void onPointerUp(PointerUpEvent event) {
     updatePointer(event);
 
-    notifier.dragPointUuid = null;
+    data.dragPointUuid = null;
   }
 
   @override
@@ -129,7 +138,7 @@ class _EditorState extends State<Editor> {
     super.initState();
 
     transformationController.addListener(() {
-      notifier.scale = transformationController.value.getMaxScaleOnAxis();
+      data.scale = transformationController.value.getMaxScaleOnAxis();
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -168,7 +177,7 @@ class _EditorState extends State<Editor> {
                       onPointerPanZoomEnd: updatePointer,
                       child: MouseRegion(
                           onExit: (PointerExitEvent event) {
-                            notifier.activePointer = null;
+                            data.activePointer = null;
                           },
                           cursor: activeEditingTool.preferredCursor,
                           child: EditorInteractiveViewer.builder(
@@ -184,13 +193,13 @@ class _EditorState extends State<Editor> {
                                   EditorConfig.frictionCoefficient,
                               builder: (BuildContext context, Quad viewport) {
                                 return ListenableBuilder(
-                                    listenable: notifier,
+                                    listenable: data,
                                     builder:
                                         (BuildContext context, Widget? child) {
                                       return CustomPaint(
                                         painter: EditorPainter(
                                           viewport: viewport,
-                                          editorData: notifier,
+                                          editorData: data,
                                           toggleGrid: gridToggleState,
                                           editingTool: activeEditingTool,
                                         ),

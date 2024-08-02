@@ -2,18 +2,24 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:toolfoam/models/tools/tf_tool_data.dart';
+import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 
-import '../../models/line.dart';
+import '../../geometry/line.dart';
+import '../../models/snap.dart';
+import '../../models/tf_id.dart';
+import '../../models/tf_tool_data.dart';
 import 'editor_logic.dart';
 
 class EditorData extends ChangeNotifier {
   EditorData({
     required this.toolData,
+    required this.gridToggleState,
   });
 
   static final Logger logger = Logger('EditorData');
+
+  bool Function() gridToggleState;
 
   void redraw() {
     notifyListeners();
@@ -31,6 +37,7 @@ class EditorData extends ChangeNotifier {
   }
 
   double get scaleInverse => 1 / scale;
+  double get tolerance => EditorConfig.defaultSnapTolerance * scaleInverse;
 
   double get effectiveGridSize => EditorConfig.minorGridSize * scale;
   int get gridRatio =>
@@ -49,100 +56,102 @@ class EditorData extends ChangeNotifier {
     notifyListeners();
   }
 
-  Offset gridSnap(Offset offset) {
-    return Offset(
+  Snap? nearestGridSnap(Offset offset) {
+    if (!gridToggleState()) return null;
+    Offset target = Offset(
       (offset.dx / gridSize).round() * gridSize,
       (offset.dy / gridSize).round() * gridSize,
     );
+
+    double tolerance = EditorConfig.defaultSnapTolerance;
+    if (target == Offset.zero) tolerance = EditorConfig.ucsRadius * 2;
+    tolerance *= scaleInverse;
+
+    bool shouldSnap = EditorLogic.interceptsSquare(target, offset, tolerance);
+
+    if (!shouldSnap) return null;
+    double distanceSquared = (target - offset).distanceSquared;
+    return Snap.grid(target, distanceSquared);
   }
 
-  Offset? get activePointerGridSnap {
-    if (activePointer == null) return null;
-    return gridSnap(activePointer!);
-  }
+  Snap? nearestPointSnap(Offset offset, Set<TfId> ignore) {
+    Snap? snap;
+    for (MapEntry<TfId, Point> entry in toolData.fixedPoints.entries) {
+      TfId id = entry.key;
+      Offset target = entry.value.toOffset();
 
-  bool shouldSnapToGrid(Offset offset) {
-    Offset snapped = gridSnap(offset);
-    double snapTolerance = EditorConfig.defaultSnapTolerance;
-    if (snapped == Offset.zero) snapTolerance = EditorConfig.ucsRadius * 2;
-    return EditorLogic.interceptsSquare(
-        snapped, offset, snapTolerance * scaleInverse);
-  }
+      if (ignore.contains(id)) continue;
 
-  bool? get activeShouldSnapToGrid {
-    if (activePointer == null) return null;
-    return shouldSnapToGrid(activePointer!);
-  }
+      bool isSnap = EditorLogic.interceptsCircle(target, offset, tolerance);
 
-  Offset? nearestLineSnap(Offset offset, {String? ignoreUuid}) {
-    Offset? nearestLineSnap;
-    double nearestDistance = double.infinity;
-    for (Line line in toolData.lines) {
-      if (line.point1 == ignoreUuid || line.point2 == ignoreUuid) continue;
+      if (!isSnap) continue;
 
-      Offset start = toolData.points[line.point1]!;
-      Offset end = toolData.points[line.point2]!;
+      Offset delta = target - offset;
+      double distanceSquared = delta.distanceSquared;
+      Snap candidate = Snap.point(target, distanceSquared, id);
 
-      Offset nearestPoint = EditorLogic.nearestPointOnLine(start, end, offset);
-      Offset delta = nearestPoint - offset;
-      double distance = delta.distanceSquared;
-
-      bool isNearest = distance < nearestDistance;
-      double threshold = EditorConfig.defaultSnapTolerance / 2 * scaleInverse;
-      bool isSnap = distance < threshold * threshold;
-
-      if (isNearest && isSnap) {
-        nearestLineSnap = nearestPoint;
-        nearestDistance = distance;
-      }
+      if (snap == null || candidate < snap) snap = candidate;
     }
 
-    return nearestLineSnap;
+    return snap;
   }
 
-  MapEntry<String, Offset>? nearestPointSnap(
-      Offset offset, String? ignoreUuid) {
-    MapEntry<String, Offset>? nearestPointSnap;
-    double nearestDistance = double.infinity;
-    for (MapEntry<String, Offset> entry in toolData.points.entries) {
-      if (entry.key == ignoreUuid) continue;
+  Snap? nearestLineSnap(Offset offset, Set<TfId> ignore) {
+    Snap? snap;
+    for (MapEntry<TfId, Line> entry in toolData.lines.entries) {
+      TfId id = entry.key;
+      Line line = entry.value;
 
-      Offset point = entry.value;
-      Offset delta = point - offset;
-      double distance = delta.distanceSquared;
+      if (ignore.contains(id)) continue;
 
-      bool isNearest = distance < nearestDistance;
-      bool isSnap = EditorLogic.interceptsCircle(entry.value, offset,
-          EditorConfig.defaultSnapTolerance / 2 * scaleInverse);
+      Point? startPoint = toolData.fixedPoints[line.a];
+      Point? endPoint = toolData.fixedPoints[line.b];
 
-      if (isNearest && isSnap) {
-        nearestPointSnap = entry;
-        nearestDistance = distance;
-      }
+      if (startPoint == null || endPoint == null) continue;
+
+      Offset start = startPoint.toOffset();
+      Offset end = endPoint.toOffset();
+
+      Offset target = EditorLogic.nearestPointOnLine(start, end, offset);
+      bool meetsTolerance =
+          EditorLogic.interceptsCircle(target, offset, tolerance);
+
+      if (!meetsTolerance) continue;
+
+      Offset delta = target - offset;
+      double distanceSquared = delta.distanceSquared;
+      Snap candidate = Snap.line(target, distanceSquared, id);
+
+      if (snap == null || candidate < snap) snap = candidate;
     }
 
-    return nearestPointSnap;
+    return snap;
   }
 
-  Offset effectivePointerCoordinates(Offset offset, {String? ignoreUuid}) {
-    MapEntry<String, Offset>? pointSnap = nearestPointSnap(offset, ignoreUuid);
-    if (pointSnap != null) return pointSnap.value;
+  Snap? nearestSnap(Offset pointer, Set<TfId> ignore) {
+    Set<Snap> snaps = Set.identity();
 
-    Offset? lineSnap = nearestLineSnap(offset);
-    if (lineSnap != null) return lineSnap;
+    Snap? point = nearestPointSnap(pointer, ignore);
+    if (point != null) snaps.add(point);
 
-    if (shouldSnapToGrid(offset)) return gridSnap(offset);
+    Snap? line = nearestLineSnap(pointer, ignore);
+    if (line != null) snaps.add(line);
 
-    return offset;
+    Snap? grid = nearestGridSnap(pointer);
+    if (grid != null) snaps.add(grid);
+
+    if (snaps.isEmpty) return null;
+    return snaps.reduce(Snap.min);
   }
 
-  Offset? get activeEffectivePointer {
-    if (activePointer == null) return null;
-    return effectivePointerCoordinates(activePointer!);
+  Snap? get snap {
+    Offset? pointer = activePointer;
+    if (pointer == null) return null;
+    return nearestSnap(pointer, Set.identity());
   }
 
   TfToolData toolData;
-  List<String> actionPointerStack = [];
+  List<TfId> actionPointerStack = [];
 
   double? confirmationRadius;
   Offset? confirmationMarker;
@@ -158,9 +167,9 @@ class EditorData extends ChangeNotifier {
     return shouldConfirm(activePointer!);
   }
 
-  String? _dragPointUuid;
-  String? get dragPointUuid => _dragPointUuid;
-  set dragPointUuid(String? value) {
+  TfId? _dragPointUuid;
+  TfId? get dragPointUuid => _dragPointUuid;
+  set dragPointUuid(TfId? value) {
     if (value == _dragPointUuid) return;
     _dragPointUuid = value;
     notifyListeners();

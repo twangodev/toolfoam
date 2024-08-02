@@ -17,7 +17,7 @@ class EditorConfig {
 
   static const defaultSnapTolerance = 16.0;
 
-  static const confirmationMarkerSize = 10.0;
+  static const confirmationMarkerRadius = 10.0;
   static const confirmationMarkerDistance = 50.0;
 
   // Painter Configuration
