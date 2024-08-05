@@ -35,4 +35,13 @@ abstract class IdentifiableJsonBiMap<T extends JsonSerializable>
   T? remove(TfId id) => map.remove(id);
 
   TfId? getId(T value) => map.inverse[value];
+
+  MapEntry<String, dynamic> _transform(TfId id, T value) {
+    return MapEntry(id.toString(), value.toJson());
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return map.map(_transform);
+  }
 }

@@ -27,8 +27,8 @@ class Line implements JsonSerializable {
   String toString() => 'Line($a, $b)';
 
   @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() => {
+        'start': a.toString(),
+        'end': b.toString(),
+      };
 }

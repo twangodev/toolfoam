@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -9,11 +11,14 @@ import 'package:toolfoam/pages/home_page.dart';
 void main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
-    if (kDebugMode) {
-      String name = record.loggerName;
-      if (name.isEmpty) name = 'root';
-      print('[${record.level.name}] $name-${record.time}: ${record.message}');
-    }
+    log(record.message,
+        level: record.level.value,
+        name: record.loggerName,
+        time: record.time,
+        sequenceNumber: record.sequenceNumber,
+        zone: record.zone,
+        error: record.error,
+        stackTrace: record.stackTrace);
   });
 
   Logger.root.info('Starting Toolfoam');

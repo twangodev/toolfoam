@@ -14,7 +14,6 @@ class TfToolData implements JsonSerializable {
   }
 
   @override
-  Map<String, dynamic> toJson() {
-    throw UnimplementedError();
-  }
+  Map<String, dynamic> toJson() =>
+      {'fixedPoints': fixedPoints.toJson(), 'lines': lines.toJson()};
 }

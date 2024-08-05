@@ -8,10 +8,4 @@ class LineData extends IdentifiableJsonBiMap<Line> {
         .where((entry) => entry.value.contains(id))
         .map((entry) => entry.key);
   }
-
-  @override
-  Map<String, dynamic> toJson() {
-    // TODO: implement toJson
-    throw UnimplementedError();
-  }
 }
