@@ -5,7 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 
-import '../../geometry/line.dart';
+import '../../geometry/segment.dart';
 import '../../models/snap.dart';
 import '../../models/tf_id.dart';
 import '../../models/tf_tool_data.dart';
@@ -94,23 +94,21 @@ class EditorData extends ChangeNotifier {
     return snap;
   }
 
-  Snap? nearestLineSnap(Offset offset, Set<TfId> ignore) {
+  Snap? nearestSegmentSnap(Offset offset, Set<TfId> ignore) {
     Snap? snap;
-    for (MapEntry<TfId, Line> entry in toolData.lines.entries) {
+    for (MapEntry<TfId, Segment> entry in toolData.segments.entries) {
       TfId id = entry.key;
-      Line line = entry.value;
+      Segment segment = entry.value;
 
       if (ignore.contains(id)) continue;
 
-      Point? startPoint = toolData.fixedPoints[line.a];
-      Point? endPoint = toolData.fixedPoints[line.b];
+      Point? start = toolData.fixedPoints[segment.a];
+      Point? end = toolData.fixedPoints[segment.b];
 
-      if (startPoint == null || endPoint == null) continue;
+      if (start == null || end == null) continue;
 
-      Offset start = startPoint.toOffset();
-      Offset end = endPoint.toOffset();
-
-      Offset target = EditorLogic.nearestPointOnLine(start, end, offset);
+      Point targetPoint = EditorLogic.nearestPointOnSegment(start, end, offset);
+      Offset target = targetPoint.toOffset();
       bool meetsTolerance =
           EditorLogic.interceptsCircle(target, offset, tolerance);
 
@@ -132,8 +130,8 @@ class EditorData extends ChangeNotifier {
     Snap? point = nearestPointSnap(pointer, ignore);
     if (point != null) snaps.add(point);
 
-    Snap? line = nearestLineSnap(pointer, ignore);
-    if (line != null) snaps.add(line);
+    Snap? segment = nearestSegmentSnap(pointer, ignore);
+    if (segment != null) snaps.add(segment);
 
     Snap? grid = nearestGridSnap(pointer);
     if (grid != null) snaps.add(grid);

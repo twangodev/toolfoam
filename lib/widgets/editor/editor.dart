@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:toolfoam/extensions/list_extensions.dart';
+import 'package:toolfoam/extensions/list_extension.dart';
 import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/models/tf_id.dart';
 import 'package:toolfoam/models/tf_tool.dart';
@@ -12,7 +12,7 @@ import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:toolfoam/widgets/editor/editor_toolbar.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import '../../geometry/line.dart';
+import '../../geometry/segment.dart';
 import '../../models/editing_tool.dart';
 import '../../models/tf_tool_data.dart';
 
@@ -63,7 +63,7 @@ class _EditorState extends State<Editor> {
       TfId dragPoint = data.dragPointUuid!;
 
       Set<TfId> ignore = {dragPoint};
-      ignore.addAll(data.toolData.lines.dependsOn(dragPoint));
+      ignore.addAll(data.toolData.segments.dependsOn(dragPoint));
       Offset effectivePointer = data.nearestSnap(scenePointer, ignore)?.point ??
           scenePointer; // TODO fix this madness
 
@@ -116,8 +116,8 @@ class _EditorState extends State<Editor> {
         TfId start = data.actionPointerStack.secondLast;
         TfId end = data.actionPointerStack.last;
 
-        Line line = Line(start, end);
-        toolData.lines.add(line);
+        Segment line = Segment(start, end);
+        toolData.segments.add(line);
       }
 
       data.redraw();

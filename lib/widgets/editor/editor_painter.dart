@@ -2,14 +2,16 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:toolfoam/extensions/list_extensions.dart';
+import 'package:toolfoam/extensions/canvas_extension.dart';
+import 'package:toolfoam/extensions/list_extension.dart';
 import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
-import '../../geometry/line.dart';
+import '../../geometry/fit_point_spline.dart';
+import '../../geometry/segment.dart';
 import '../../models/snap.dart';
 import '../../models/tf_id.dart';
 import '../../models/tf_tool_data.dart';
@@ -231,34 +233,41 @@ class EditorPainter extends CustomPainter {
   }
 
   void drawPoints(Canvas canvas) {
-    final Paint defaultFillPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2 * scaleInverse
-      ..style = PaintingStyle.fill;
-
-    final Paint defaultStrokePaint = Paint()
-      ..color = Colors.grey.shade900
-      ..strokeWidth = 2 * scaleInverse
-      ..style = PaintingStyle.stroke;
-
-    double radius = EditorConfig.pointRadius * scaleInverse;
-    for (FixedPoint point in toolData.fixedPoints.values) {
-      Offset offset = point.toOffset();
-      canvas.drawCircle(offset, radius, defaultFillPaint);
-      canvas.drawCircle(offset, radius, defaultStrokePaint);
+    for (var point in toolData.fixedPoints.values) {
+      canvas.drawPoint(point, scaleInverse);
     }
   }
 
-  void drawLines(Canvas canvas) {
+  void drawSegments(Canvas canvas) {
     final Paint linePaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2 * scaleInverse;
 
-    for (Line line in toolData.lines.values) {
-      Offset start = toolData.fixedPoints[line.a]!.toOffset();
-      Offset end = toolData.fixedPoints[line.b]!.toOffset();
+    for (Segment segment in toolData.segments.values) {
+      Offset start = toolData.fixedPoints[segment.a]!.toOffset();
+      Offset end = toolData.fixedPoints[segment.b]!.toOffset();
       canvas.drawLine(start, end, linePaint);
     }
+  }
+
+  void drawFitPointSplines(Canvas canvas) {
+    FixedPoint a = FixedPoint(0, 0);
+    FixedPoint b = FixedPoint(100, 0);
+
+    FitPointSpline spline =
+        FitPointSpline.auto(TfId.unique(), TfId.unique(), a, b, [
+      FixedPoint(25, 75),
+      FixedPoint(50, 50),
+      FixedPoint(75, 75),
+    ]);
+
+    canvas.drawFitPointSpline(spline, a, b, scaleInverse, true);
+
+    // for (FitPointSpline spline in toolData.fitPointSplines.values) {
+    //   FixedPoint a = toolData.fixedPoints[spline.a]!;
+    //   FixedPoint b = toolData.fixedPoints[spline.b]!;
+    //   canvas.drawFitPointSpline(spline, a, b, splinePaint);
+    // }
   }
 
   void drawDistanceEdgeMarker(
@@ -482,7 +491,8 @@ class EditorPainter extends CustomPainter {
     establishCenterMarkings(canvas);
 
     drawPoints(canvas);
-    drawLines(canvas);
+    drawSegments(canvas);
+    drawFitPointSplines(canvas);
 
     drawEditToolPreview(canvas);
     establishMarker(canvas);

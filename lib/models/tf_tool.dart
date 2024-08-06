@@ -7,7 +7,7 @@ import 'package:toolfoam/models/tf_id.dart';
 import 'package:toolfoam/models/tf_tool_data.dart';
 import 'package:toolfoam/models/tf_tool_metadata.dart';
 
-import '../data/organization_structure_data.dart';
+import '../constants/organization_structure.dart';
 import '../utilities/storage_file_system_util.dart';
 import 'entity.dart';
 import 'json_serializable.dart';
@@ -50,7 +50,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   Future<File> _getFile() async {
     Directory dir = await owner.getToolsDirectory();
     String name = id.toString();
-    String ext = OrganizationStructureData.toolExtension;
+    String ext = OrganizationStructure.toolExtension;
     return StorageFileSystemUtil.buildFileWithExtension(dir, name, ext);
   }
 

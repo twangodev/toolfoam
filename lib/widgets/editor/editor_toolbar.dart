@@ -172,14 +172,14 @@ class _EditorToolbarState extends State<EditorToolbar> {
           onPressed: () => setTool(EditingTool.circle),
         ),
         ToolbarButton.fromEditingTool(
-          editingTool: EditingTool.spline,
-          isToggled: activeEditingTool == EditingTool.spline,
-          onPressed: () => setTool(EditingTool.spline),
+          editingTool: EditingTool.fitPointSpline,
+          isToggled: activeEditingTool == EditingTool.fitPointSpline,
+          onPressed: () => setTool(EditingTool.fitPointSpline),
         ),
         ToolbarButton.fromEditingTool(
-          editingTool: EditingTool.bezier,
-          isToggled: activeEditingTool == EditingTool.bezier,
-          onPressed: () => setTool(EditingTool.bezier),
+          editingTool: EditingTool.controlPointSpline,
+          isToggled: activeEditingTool == EditingTool.controlPointSpline,
+          onPressed: () => setTool(EditingTool.controlPointSpline),
         ),
         ToolbarButton.fromEditingTool(
           editingTool: EditingTool.symmetry,

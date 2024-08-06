@@ -31,8 +31,10 @@ enum EditingTool {
   ),
   rectangle(tooltip: 'Rectangle', icon: Symbols.rectangle_rounded),
   circle(tooltip: 'Circle', icon: Symbols.circle_rounded),
-  spline(tooltip: 'Spline', icon: Symbols.conversion_path_rounded),
-  bezier(tooltip: 'Bezier', icon: Symbols.line_curve_rounded),
+  fitPointSpline(
+      tooltip: 'Fit Point Spline', icon: Symbols.conversion_path_rounded),
+  controlPointSpline(
+      tooltip: 'Control Point Spline', icon: Symbols.line_curve_rounded),
   symmetry(tooltip: 'Symmetry', icon: Symbols.details),
   autoNotch(tooltip: 'Auto Notch', icon: Symbols.shape_line_rounded);
 

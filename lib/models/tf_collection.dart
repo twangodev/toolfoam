@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:toolfoam/constants/organization_structure.dart';
 import 'package:toolfoam/models/tf_id.dart';
 import 'package:toolfoam/models/tf_tool.dart';
 
-import '../data/organization_structure_data.dart';
 import '../utilities/storage_file_system_util.dart';
 import 'entity.dart';
 import 'metadata.dart';
@@ -16,7 +16,7 @@ class TfCollection extends Entity {
   static Future<Directory> _getCollectionsDirectory() async {
     return StorageFileSystemUtil.buildDirectory(
         await StorageFileSystemUtil.getStorage(),
-        OrganizationStructureData.collections);
+        OrganizationStructure.collections);
   }
 
   Future<Directory> _getCollection() async {
@@ -43,7 +43,7 @@ class TfCollection extends Entity {
   }
 
   Future<Directory> getToolsDirectory() async {
-    return await _buildDirectoryFromCollection(OrganizationStructureData.tools);
+    return await _buildDirectoryFromCollection(OrganizationStructure.tools);
   }
 
   Future<List<TfTool>> listTools() async {
@@ -53,13 +53,12 @@ class TfCollection extends Entity {
   }
 
   Future<Directory> getLayoutsDirectory() async {
-    return await _buildDirectoryFromCollection(
-        OrganizationStructureData.layouts);
+    return await _buildDirectoryFromCollection(OrganizationStructure.layouts);
   }
 
   Future<File> _getMetadataFile() async {
     return StorageFileSystemUtil.buildFile(
-        await _getCollection(), OrganizationStructureData.metadata);
+        await _getCollection(), OrganizationStructure.metadata);
   }
 
   @override
@@ -115,7 +114,7 @@ class TfCollection extends Entity {
 
   Future writeMetadata(Metadata metadata) async {
     File metadataFile = StorageFileSystemUtil.buildFile(
-        await _getCollection(), OrganizationStructureData.metadata);
+        await _getCollection(), OrganizationStructure.metadata);
     await StorageFileSystemUtil.writeToFile(metadataFile, jsonEncode(metadata));
   }
 

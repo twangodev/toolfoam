@@ -1,4 +1,4 @@
-class OrganizationStructureData {
+class OrganizationStructure {
   static const String metadata = 'metadata.json';
 
   static const String toolExtension = '.tool';

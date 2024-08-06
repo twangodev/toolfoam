@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:toolfoam/geometry/point.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class EditorLogic {
@@ -13,9 +14,9 @@ class EditorLogic {
     return distance < radius * radius;
   }
 
-  static Offset nearestPointOnLine(Offset start, Offset end, Offset offset) {
-    final Vector2 startVector = Vector2(start.dx, start.dy);
-    final Vector2 endVector = Vector2(end.dx, end.dy);
+  static Point nearestPointOnSegment(Point start, Point end, Offset offset) {
+    final Vector2 startVector = start.toVector2();
+    final Vector2 endVector = end.toVector2();
     final Vector2 pointVector = Vector2(offset.dx, offset.dy);
 
     final Vector2 lineVector = endVector - startVector;
@@ -34,6 +35,6 @@ class EditorLogic {
       nearestPoint = startVector + lineVector * t;
     }
 
-    return Offset(nearestPoint.x, nearestPoint.y);
+    return FixedPoint.fromVector2(nearestPoint);
   }
 }
