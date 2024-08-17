@@ -11,7 +11,7 @@ import 'package:toolfoam/pages/home_page.dart';
 void main() async {
   Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
   Logger.root.onRecord.listen((record) {
-    log(record.message,
+    log('[${record.level.name}] ${record.message}',
         level: record.level.value,
         name: record.loggerName,
         time: record.time,
@@ -21,7 +21,7 @@ void main() async {
         stackTrace: record.stackTrace);
   });
 
-  Logger.root.info('Starting Toolfoam');
+  Logger('toolfoam.main').info('Starting Toolfoam');
 
   runApp(const Toolfoam());
 }

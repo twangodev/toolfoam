@@ -8,7 +8,7 @@ import 'package:toolfoam/models/tf_tool.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 import 'package:toolfoam/widgets/editor/editor_interactive_viewer.dart';
 import 'package:toolfoam/widgets/editor/editor_painter.dart';
-import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
+import 'package:toolfoam/widgets/editor/editor_data.dart';
 import 'package:toolfoam/widgets/editor/editor_toolbar.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -26,7 +26,7 @@ class Editor extends StatefulWidget {
 }
 
 class _EditorState extends State<Editor> {
-  static final logger = Logger('TFEditorState');
+  static final logger = Logger('toolfoam.widgets.editor');
 
   final transformationController = TransformationController();
 
@@ -42,17 +42,23 @@ class _EditorState extends State<Editor> {
       toolData: widget.tool.data, gridToggleState: () => gridToggleState);
 
   void toggleGrid(bool newState) {
+    logger.finer('Toggling grid to $newState');
     setState(() {
       gridToggleState = newState;
     });
   }
 
   void setTool(EditingTool tool) {
-    data.actionPointerStack.clear();
+    logger.finer('Setting tool to ${tool.tooltip}');
+    logger.finer(
+        'Clearing current contents of action stack: ${data.pointStack}');
+    data.pointStack.clear();
     setState(() {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
     });
+    logger.finer('Optimizing tool data');
+    data.toolData.optimize();
   }
 
   void updatePointer(PointerEvent event) {
@@ -102,19 +108,18 @@ class _EditorState extends State<Editor> {
     if (activeEditingTool == EditingTool.line) {
       if (data.shouldConfirm(scenePointer)) {
         logger.finer('Confirming line, clearing action stack');
-        data.actionPointerStack.clear();
+        data.pointStack.clear();
         data.redraw();
         return;
       }
 
       TfToolData toolData = data.toolData;
-      TfId pointId =
-          toolData.fixedPoints.add(FixedPoint.fromOffset(effectivePointer));
-      data.actionPointerStack.add(pointId);
+      TfId pointId = toolData.fixedPoints.add(FixedPoint.fromOffset(effectivePointer));
+      data.pointStack.add(pointId);
 
-      if (data.actionPointerStack.length >= 2) {
-        TfId start = data.actionPointerStack.secondLast;
-        TfId end = data.actionPointerStack.last;
+      if (data.pointStack.length >= 2) {
+        TfId start = data.pointStack.secondLast;
+        TfId end = data.pointStack.last;
 
         Segment line = Segment(start, end);
         toolData.segments.add(line);
@@ -122,6 +127,10 @@ class _EditorState extends State<Editor> {
 
       data.redraw();
       return;
+    }
+
+    if (activeEditingTool == EditingTool.line) {
+
     }
   }
 

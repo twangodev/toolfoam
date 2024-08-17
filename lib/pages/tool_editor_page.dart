@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:toolfoam/models/tf_tool.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';
 import 'package:toolfoam/widgets/editor/editor.dart';
@@ -13,9 +14,12 @@ class ToolEditorPage extends StatefulWidget {
 }
 
 class _ToolEditorPageState extends State<ToolEditorPage> {
+  final Logger logger = Logger('toolfoam.pages.tool_editor_page');
+
   String? name;
 
   void onRename(String newName) {
+    logger.fine('Renaming tool to $newName');
     setState(() {
       name = newName;
     });

@@ -7,7 +7,7 @@ import 'package:toolfoam/extensions/list_extension.dart';
 import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/models/editing_tool.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
-import 'package:toolfoam/widgets/editor/editor_painter_data.dart';
+import 'package:toolfoam/widgets/editor/editor_data.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import '../../geometry/fit_point_spline.dart';
@@ -49,7 +49,7 @@ class EditorPainter extends CustomPainter {
   late final Offset? activePointer = editorData.activePointer;
   late final Snap? snap = editorData.snap;
   late final TfToolData toolData = editorData.toolData;
-  late final actionPointerStack = editorData.actionPointerStack;
+  late final actionPointerStack = editorData.pointStack;
 
   bool confirmationMarkerDrawn = false;
 
@@ -252,7 +252,8 @@ class EditorPainter extends CustomPainter {
 
   void drawFitPointSplines(Canvas canvas) {
     FixedPoint a = FixedPoint(0, 0);
-    FixedPoint b = FixedPoint(100, 0);
+    FixedPoint b =
+        FixedPoint.fromOffset(activePointer ?? const Offset(100, 100));
 
     FitPointSpline spline =
         FitPointSpline.auto(TfId.unique(), TfId.unique(), a, b, [
@@ -262,6 +263,10 @@ class EditorPainter extends CustomPainter {
     ]);
 
     canvas.drawFitPointSpline(spline, a, b, scaleInverse, true);
+
+    for (FitPointSpline spline in toolData.fitPointSplines.values) {
+      canvas.drawFitPointSpline(spline, a, b, scaleInverse, true);
+    }
 
     // for (FitPointSpline spline in toolData.fitPointSplines.values) {
     //   FixedPoint a = toolData.fixedPoints[spline.a]!;

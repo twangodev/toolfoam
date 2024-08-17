@@ -141,7 +141,7 @@ class CollectionCard extends StatefulWidget {
 }
 
 class _CollectionCardState extends State<CollectionCard> {
-  Logger log = Logger('CollectionCard');
+  Logger log = Logger('toolfoam.widgets.dialogs.collection_card');
   String? name;
   bool hasSynced = false;
   bool starred = false;

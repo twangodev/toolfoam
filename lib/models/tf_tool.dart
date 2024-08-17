@@ -14,7 +14,8 @@ import 'json_serializable.dart';
 import 'tf_collection.dart';
 
 class TfTool extends DiskIOEntity implements JsonSerializable {
-  static final Logger logger = Logger('TfTool');
+  static final Logger staticLogger = Logger('toolfoam.models.tf_tool');
+  late final Logger logger = Logger('toolfoam.models.tf_tool.${id.toString()}');
 
   TfToolMetadata metadata = TfToolMetadata.empty();
   TfCollection owner;
@@ -31,6 +32,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     Map<String, dynamic> json = jsonDecode(rawJson);
     String name = p.basenameWithoutExtension(file.path);
     TfId id = TfId(name);
+    staticLogger.finer('Loaded tool $id from file');
     return TfTool.fromJson(json, id, owner);
   }
 
@@ -38,6 +40,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
       List<File> files, TfCollection owner) async {
     List<Future<TfTool>> futures =
         files.map((file) => fromFile(file, owner)).toList();
+    staticLogger.finer('Loading ${futures.length} tools from files');
     return await Future.wait(futures);
   }
 
@@ -65,6 +68,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
   }
 
   void rename(String name) {
+    logger.finer('Renaming tool to $name');
     metadata.name = name;
   }
 
@@ -76,6 +80,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     TfTool diskTool = TfTool.fromJson(jsonMap, id, owner);
 
     copy(diskTool);
+    logger.finer('Pulled tool $id from file');
   }
 
   @override
@@ -84,6 +89,7 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     String json = jsonEncode(toJson());
     await StorageFileSystemUtil.writeToFile(file, json);
     await owner.lastChangedNow();
+    logger.finer('Pushed tool $id to file');
   }
 
   @override
@@ -91,10 +97,13 @@ class TfTool extends DiskIOEntity implements JsonSerializable {
     (await _getFile()).create();
     metadata = TfToolMetadata.name(name);
     await push();
+    logger.finer('Created tool $id');
   }
 
   @override
   Future<void> delete() async {
     (await _getFile()).delete();
+    await owner.lastChangedNow();
+    logger.finer('Deleted tool $id');
   }
 }

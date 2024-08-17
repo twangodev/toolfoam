@@ -27,14 +27,9 @@ class FitPointSpline extends Curve {
       return FitPointSpline(aId, aPoint - mid, bId, bPoint - mid, []);
     }
 
-    List<ControlPoint> controlPoints =
-        ControlPoint.autoTangent(points, aPoint, bPoint);
-    FixedPoint aRelativeOut =
-        TangentHandle.autoNeighbours(aPoint, controlPoints.first)
-            .relativeInTangent;
-    FixedPoint bRelativeIn =
-        TangentHandle.autoNeighbours(controlPoints.last, bPoint)
-            .relativeOutTangent;
+    List<ControlPoint> controlPoints = ControlPoint.autoTangent(points, aPoint, bPoint);
+    FixedPoint aRelativeOut = TangentHandle.autoNeighbours(aPoint, controlPoints.first).relativeInTangent;
+    FixedPoint bRelativeIn = TangentHandle.autoNeighbours(controlPoints.last, bPoint).relativeOutTangent;
 
     return FitPointSpline(aId, aRelativeOut, bId, bRelativeIn, controlPoints);
   }

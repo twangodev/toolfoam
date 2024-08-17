@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:toolfoam/pages/layouts_page.dart';
 import 'package:toolfoam/pages/tools_page.dart';
 import 'package:toolfoam/widgets/breadcrumb.dart';
@@ -15,6 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final Logger logger = Logger('toolfoam.pages.home_page');
+
   final _pageController = PageController();
   final TextBreadcrumbItem _headerBreadcrumbItem =
       const TextBreadcrumbItem(text: 'Toolfoam');
@@ -25,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   List<BreadcrumbItem> breadcrumbItems = [];
 
   _onCollectionSelected(TfCollection? collection) {
+    logger.finer('Collection selected: ${collection?.id}');
     setState(() {
       selectedCollection = collection;
     });
@@ -52,6 +56,9 @@ class _HomePageState extends State<HomePage> {
     } else if (selectedPage == 1) {
       items.add(TextBreadcrumbItem(text: 'Layouts', onTap: () {}));
     }
+
+    logger.finest(
+        'Breadcrumb items: ${items.map((item) => item.text).join(' > ')}');
 
     return items;
   }
@@ -108,6 +115,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void syncCollectionDetails() async {
+    logger.finer('Syncing collection details');
     String? updatedName = await selectedCollection?.getName();
 
     setState(() {

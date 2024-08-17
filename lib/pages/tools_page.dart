@@ -28,7 +28,7 @@ class ToolsPage extends StatefulWidget {
 }
 
 class _ToolsPageState extends State<ToolsPage> {
-  static final Logger logger = Logger('ToolsPage');
+  static final Logger logger = Logger('toolfoam.pages.tools_page');
 
   List<TfTool> tools = [];
 

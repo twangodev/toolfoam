@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:toolfoam/geometry/point.dart';
 import 'package:toolfoam/widgets/editor/editor_config.dart';
 
@@ -16,8 +15,6 @@ class EditorData extends ChangeNotifier {
     required this.toolData,
     required this.gridToggleState,
   });
-
-  static final Logger logger = Logger('EditorData');
 
   bool Function() gridToggleState;
 
@@ -147,7 +144,7 @@ class EditorData extends ChangeNotifier {
   }
 
   TfToolData toolData;
-  List<TfId> actionPointerStack = [];
+  List<TfId> pointStack = [];
 
   double? confirmationRadius;
   Offset? confirmationMarker;

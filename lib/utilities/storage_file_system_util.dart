@@ -5,11 +5,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class StorageFileSystemUtil {
-  static final Logger logger = Logger('StorageFileSystemUtil');
+  static final Logger logger = Logger('toolfoam.utilities.storage_file_system');
 
   static Future<Directory> getStorage() async {
     Directory dir = await getApplicationSupportDirectory();
-    logger.finest('Application Storage directory requested: ${dir.path}');
+    logger.finest('Storage directory: ${dir.path}');
     return dir;
   }
 

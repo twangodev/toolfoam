@@ -11,8 +11,6 @@ class Segment extends Curve {
 
   Segment(this.a, this.b);
 
-  bool contains(TfId id) => id == a || id == b;
-
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

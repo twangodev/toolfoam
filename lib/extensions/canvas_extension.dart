@@ -38,7 +38,15 @@ extension CanvasExtension on Canvas {
 
     Path path = Path();
     path.moveTo(a.x, a.y);
-    FixedPoint lastOut = a + spline.aRelativeOut;
+    FixedPoint aOut = a + spline.aRelativeOut;
+    FixedPoint lastOut = aOut;
+
+    topLayer.add(() {
+      drawPoint(a, scaleInverse);
+
+      drawPoint(aOut, scaleInverse);
+      drawLine(a.toOffset(), aOut.toOffset(), tangentHandleLinePaint);
+    });
 
     for (int i = 0; i < spline.controlPoints.length; i++) {
       ControlPoint current = spline.controlPoints[i];
@@ -66,10 +74,17 @@ extension CanvasExtension on Canvas {
 
     path.cubicTo(lastOut.x, lastOut.y, bIn.x, bIn.y, b.x, b.y);
 
+    topLayer.add(() {
+      drawPoint(b, scaleInverse);
+
+      drawPoint(bIn, scaleInverse);
+      drawLine(b.toOffset(), bIn.toOffset(), tangentHandleLinePaint);
+    });
+
     drawPath(path, splinePaint);
 
-    for (VoidCallback topLayerAction in topLayer) {
-      topLayerAction();
+    for (VoidCallback action in topLayer) {
+      action.call();
     }
   }
 }
