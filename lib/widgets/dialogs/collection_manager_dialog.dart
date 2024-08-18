@@ -159,7 +159,7 @@ class _CollectionCardState extends State<CollectionCard> {
 
   void syncMetadata() async {
     Metadata metadata =
-        await widget.collection?.getMetadata() ?? Metadata.empty();
+        await widget.collection?.getMetadata() ?? Metadata.identity();
 
     setState(() {
       name = metadata.name;

@@ -15,7 +15,7 @@ class Metadata implements JsonSerializable {
     return Metadata(name: name, createdAt: now, lastModified: now);
   }
 
-  factory Metadata.empty() {
+  factory Metadata.identity() {
     return Metadata.name(null);
   }
 
