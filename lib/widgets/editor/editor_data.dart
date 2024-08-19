@@ -144,6 +144,7 @@ class EditorData extends ChangeNotifier {
   }
 
   TfToolData toolData;
+  TfToolData preview = TfToolData();
   List<TfId> pointStack = [];
 
   double? confirmationRadius;

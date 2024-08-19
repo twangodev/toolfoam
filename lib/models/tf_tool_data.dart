@@ -19,25 +19,10 @@ class TfToolData implements JsonSerializable {
   final SegmentData segments = SegmentData();
   final FitPointSplineData fitPointSplines = FitPointSplineData();
 
-  // TODO get to the point where theres a intermediately unsaved state layer, so that optimize is no longer needed to catch strays, because this is "relatively" expensive
-  void optimize() {
-    HashSet<TfId> fixedPointsToRemove = HashSet();
-    fixedPointsToRemove.addAll(fixedPoints.ids);
-
-    for (Segment segment in segments.values) {
-      fixedPointsToRemove.remove(segment.a);
-      fixedPointsToRemove.remove(segment.b);
-    }
-
-    for (FitPointSpline fitPointSpline in fitPointSplines.values) {
-      fixedPointsToRemove.remove(fitPointSpline.a);
-      fixedPointsToRemove.remove(fitPointSpline.b);
-    }
-
-    logger.fine('Found ${fixedPointsToRemove.length} stray points');
-    for (TfId id in fixedPointsToRemove) {
-      fixedPoints.remove(id);
-    }
+  void addDiff(TfToolData other) {
+    fixedPoints.addDiff(other.fixedPoints);
+    segments.addDiff(other.segments);
+    fitPointSplines.addDiff(other.fitPointSplines);
   }
 
   TfToolData.fromJson(Map<String, dynamic> json) {

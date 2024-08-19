@@ -46,6 +46,11 @@ abstract class IdentifiableJsonMap<T extends JsonSerializable>
     return null;
   }
 
+  void addDiff(IdentifiableJsonMap<T> other) {
+    map.addEntries(other.map.entries);
+    other.map.clear();
+  }
+
   MapEntry<String, dynamic> _transform(TfId id, T value) {
     return MapEntry(id.toString(), value.toJson());
   }

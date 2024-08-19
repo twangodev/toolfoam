@@ -57,8 +57,6 @@ class _EditorState extends State<Editor> {
       activeEditingTool = tool;
       allowPrimaryMouseButtonPan = tool == EditingTool.pan;
     });
-    logger.finer('Optimizing tool data');
-    data.toolData.optimize();
   }
 
   void updatePointer(PointerEvent event) {
@@ -114,7 +112,8 @@ class _EditorState extends State<Editor> {
       }
 
       TfToolData toolData = data.toolData;
-      TfId pointId = toolData.fixedPoints.add(FixedPoint.fromOffset(effectivePointer));
+      TfId pointId =
+          toolData.fixedPoints.add(FixedPoint.fromOffset(effectivePointer));
       data.pointStack.add(pointId);
 
       if (data.pointStack.length >= 2) {
@@ -129,9 +128,7 @@ class _EditorState extends State<Editor> {
       return;
     }
 
-    if (activeEditingTool == EditingTool.line) {
-
-    }
+    if (activeEditingTool == EditingTool.line) {}
   }
 
   void onPointerUp(PointerUpEvent event) {
