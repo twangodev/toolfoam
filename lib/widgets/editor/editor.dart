@@ -50,8 +50,8 @@ class _EditorState extends State<Editor> {
 
   void setTool(EditingTool tool) {
     logger.finer('Setting tool to ${tool.tooltip}');
-    logger.finer(
-        'Clearing current contents of action stack: ${data.pointStack}');
+    logger
+        .finer('Clearing current contents of action stack: ${data.pointStack}');
     data.pointStack.clear();
     setState(() {
       activeEditingTool = tool;
