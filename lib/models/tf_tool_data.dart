@@ -19,12 +19,6 @@ class TfToolData implements JsonSerializable {
   final SegmentData segments = SegmentData();
   final FitPointSplineData fitPointSplines = FitPointSplineData();
 
-  void addDiff(TfToolData other) {
-    fixedPoints.addDiff(other.fixedPoints);
-    segments.addDiff(other.segments);
-    fitPointSplines.addDiff(other.fitPointSplines);
-  }
-
   TfToolData.fromJson(Map<String, dynamic> json) {
     throw UnimplementedError();
   }
