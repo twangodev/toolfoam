@@ -2,6 +2,9 @@
 
 Simple, accessible path generation for cutting foam inserts for tools.
 
+> [!NOTE]  
+> This project is still under active development.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
